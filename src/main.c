@@ -152,11 +152,13 @@ static void render() {
 }
 
 static void setup_camera() {
+	float y,z;
+	
 	/* assume already in GL_MODELVIEW */
 	glLoadIdentity();
-	float z = sin(cameraRotY*PI/180.0f) * cameraDist;
+	z = sin(cameraRotY*PI/180.0f) * cameraDist;
 	if(z == 0.0f) z = 0.0001f;
-	float y = cos(cameraRotY*PI/180.0f) * cameraDist;
+	y = cos(cameraRotY*PI/180.0f) * cameraDist;
 	gluLookAt(0, y, -z, 0, 0, 0, 0, 1, 0);
 	glRotatef(cameraRotX, 0, 1, 0);
 	glTranslatef(cameraPosX, cameraPosY, cameraPosZ);
@@ -164,6 +166,10 @@ static void setup_camera() {
 
 static void render_tile(struct tile *t) {
 	int i,j,k;
+	float j_minus_i[3];
+	float j_minus_i_mag;
+	float side_norm[3];
+	float side_norm_mag;
 	
 	/* top */
 	glColor3f(0.529f, 0.969f, 0.090f);
@@ -198,22 +204,18 @@ static void render_tile(struct tile *t) {
 			/* no neighbor that way */
 			/* draw the side */
 			j = (i+1) % (t->num_edges);
-			float j_minus_i[] = {
-				t->vertices[j].x - t->vertices[i].x,
-				t->vertices[j].y - t->vertices[i].y,
-				t->vertices[j].z - t->vertices[i].z
-			};
-			float j_minus_i_mag = sqrt(j_minus_i[0]*j_minus_i[0] + j_minus_i[1]*j_minus_i[1] + j_minus_i[2]*j_minus_i[2]);
+			j_minus_i[0] = t->vertices[j].x - t->vertices[i].x;
+			j_minus_i[1] = t->vertices[j].y - t->vertices[i].y;
+			j_minus_i[2] = t->vertices[j].z - t->vertices[i].z;
+			j_minus_i_mag = sqrt(j_minus_i[0]*j_minus_i[0] + j_minus_i[1]*j_minus_i[1] + j_minus_i[2]*j_minus_i[2]);
 			for(k = 0; k < 3; k++) { /* normalize j_minus_i */
 				j_minus_i[k] = j_minus_i[k] / j_minus_i_mag;
 			}
 			
-			float side_norm[] = {
-				j_minus_i[1] * t->norm_z - j_minus_i[2] * t->norm_y,
-				j_minus_i[2] * t->norm_x - j_minus_i[0] * t->norm_z,
-				j_minus_i[0] * t->norm_y - j_minus_i[1] * t->norm_x
-			};
-			float side_norm_mag = sqrt(side_norm[0]*side_norm[0] + side_norm[1]*side_norm[1] + side_norm[2]*side_norm[2]);
+			side_norm[0] = j_minus_i[1] * t->norm_z - j_minus_i[2] * t->norm_y;
+			side_norm[1] = j_minus_i[2] * t->norm_x - j_minus_i[0] * t->norm_z;
+			side_norm[2] = j_minus_i[0] * t->norm_y - j_minus_i[1] * t->norm_x;
+			side_norm_mag = sqrt(side_norm[0]*side_norm[0] + side_norm[1]*side_norm[1] + side_norm[2]*side_norm[2]);
 			for(k = 0; k < 3; k++) { /* normalize side_norm */
 				side_norm[k] = side_norm[k] / side_norm_mag;
 			}

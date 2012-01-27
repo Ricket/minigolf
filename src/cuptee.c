@@ -132,11 +132,12 @@ void initialize_textures() {
 	int i,j;
 	int cupsize_over_2 = (CIRCLE_TEXTURE_SIZE/2);
 	int cupsize_over_2_squared = cupsize_over_2*cupsize_over_2;
+	unsigned int *cupImg;
 
 	glGenTextures(NUM_TEXTURES, textures);
 	
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_CIRCLE]);
-	unsigned int *cupImg = (unsigned int *)malloc(CIRCLE_TEXTURE_SIZE*CIRCLE_TEXTURE_SIZE*sizeof(unsigned int));
+	cupImg = (unsigned int *)malloc(CIRCLE_TEXTURE_SIZE*CIRCLE_TEXTURE_SIZE*sizeof(unsigned int));
 	for(i = 0; i < CIRCLE_TEXTURE_SIZE; i++) {
 		for(j = 0; j < CIRCLE_TEXTURE_SIZE; j++) {
 			if(cupsize_over_2_squared < (i-cupsize_over_2)*(i-cupsize_over_2) + (j-cupsize_over_2)*(j-cupsize_over_2)) {
