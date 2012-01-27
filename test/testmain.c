@@ -7,7 +7,7 @@
  * CSC 462 Assignment 1: Minigolf Rendering
  */
 
-#ifdef WIN32
+#ifdef _WIN32
 /* disable warning 'unreferenced formal parameter' */
 #  pragma warning( disable : 4100 )
 #endif

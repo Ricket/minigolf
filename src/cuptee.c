@@ -7,6 +7,11 @@
  * CSC 462 Assignment 1: Minigolf Rendering
  */
 
+#ifdef _WIN32
+/* disable warning 'unreferenced formal parameter' */
+#  pragma warning( disable : 4100 )
+#endif
+
 #include "cuptee.h"
 #include "data.h"
 
@@ -71,18 +76,18 @@ void initialize_quads(struct hole *hole) {
 		}
 		
 		/* surely there's a better way to do this, but oh well */
-		cupquad.pt[0][0] = hole->cup->x + vx[0];
-		cupquad.pt[0][1] = hole->cup->y + vx[1];
-		cupquad.pt[0][2] = hole->cup->z + vx[2];
-		cupquad.pt[1][0] = hole->cup->x - vy[0];
-		cupquad.pt[1][1] = hole->cup->y - vy[1];
-		cupquad.pt[1][2] = hole->cup->z - vy[2];
-		cupquad.pt[2][0] = hole->cup->x - vx[0];
-		cupquad.pt[2][1] = hole->cup->y - vx[1];
-		cupquad.pt[2][2] = hole->cup->z - vx[2];
-		cupquad.pt[3][0] = hole->cup->x + vy[0];
-		cupquad.pt[3][1] = hole->cup->y + vy[1];
-		cupquad.pt[3][2] = hole->cup->z + vy[2];
+		cupquad.pt[0][0] = hole->cup->x + vx[0] + tile->norm_x * 0.001f;
+		cupquad.pt[0][1] = hole->cup->y + vx[1] + tile->norm_y * 0.001f;
+		cupquad.pt[0][2] = hole->cup->z + vx[2] + tile->norm_z * 0.001f;
+		cupquad.pt[1][0] = hole->cup->x - vy[0] + tile->norm_x * 0.001f;
+		cupquad.pt[1][1] = hole->cup->y - vy[1] + tile->norm_y * 0.001f;
+		cupquad.pt[1][2] = hole->cup->z - vy[2] + tile->norm_z * 0.001f;
+		cupquad.pt[2][0] = hole->cup->x - vx[0] + tile->norm_x * 0.001f;
+		cupquad.pt[2][1] = hole->cup->y - vx[1] + tile->norm_y * 0.001f;
+		cupquad.pt[2][2] = hole->cup->z - vx[2] + tile->norm_z * 0.001f;
+		cupquad.pt[3][0] = hole->cup->x + vy[0] + tile->norm_x * 0.001f;
+		cupquad.pt[3][1] = hole->cup->y + vy[1] + tile->norm_y * 0.001f;
+		cupquad.pt[3][2] = hole->cup->z + vy[2] + tile->norm_z * 0.001f;
 	} else {
 		printf("Warning: invalid cup tile id");
 	}
@@ -115,18 +120,18 @@ void initialize_quads(struct hole *hole) {
 		}
 		
 		/* surely there's a better way to do this, but oh well */
-		teequad.pt[0][0] = hole->tee->x + vx[0];
-		teequad.pt[0][1] = hole->tee->y + vx[1];
-		teequad.pt[0][2] = hole->tee->z + vx[2];
-		teequad.pt[1][0] = hole->tee->x - vy[0];
-		teequad.pt[1][1] = hole->tee->y - vy[1];
-		teequad.pt[1][2] = hole->tee->z - vy[2];
-		teequad.pt[2][0] = hole->tee->x - vx[0];
-		teequad.pt[2][1] = hole->tee->y - vx[1];
-		teequad.pt[2][2] = hole->tee->z - vx[2];
-		teequad.pt[3][0] = hole->tee->x + vy[0];
-		teequad.pt[3][1] = hole->tee->y + vy[1];
-		teequad.pt[3][2] = hole->tee->z + vy[2];
+		teequad.pt[0][0] = hole->tee->x + vx[0] + tile->norm_x * 0.001f;
+		teequad.pt[0][1] = hole->tee->y + vx[1] + tile->norm_y * 0.001f;
+		teequad.pt[0][2] = hole->tee->z + vx[2] + tile->norm_z * 0.001f;
+		teequad.pt[1][0] = hole->tee->x - vy[0] + tile->norm_x * 0.001f;
+		teequad.pt[1][1] = hole->tee->y - vy[1] + tile->norm_y * 0.001f;
+		teequad.pt[1][2] = hole->tee->z - vy[2] + tile->norm_z * 0.001f;
+		teequad.pt[2][0] = hole->tee->x - vx[0] + tile->norm_x * 0.001f;
+		teequad.pt[2][1] = hole->tee->y - vx[1] + tile->norm_y * 0.001f;
+		teequad.pt[2][2] = hole->tee->z - vx[2] + tile->norm_z * 0.001f;
+		teequad.pt[3][0] = hole->tee->x + vy[0] + tile->norm_x * 0.001f;
+		teequad.pt[3][1] = hole->tee->y + vy[1] + tile->norm_y * 0.001f;
+		teequad.pt[3][2] = hole->tee->z + vy[2] + tile->norm_z * 0.001f;
 	} else {
 		printf("Warning: invalid tee tile id");
 	}
