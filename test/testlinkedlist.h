@@ -10,6 +10,6 @@
 #ifndef TESTLINKEDLIST_H
 #define TESTLINKEDLIST_H
 
-void test_linkedlist();
+void test_linkedlist(void);
 
 #endif

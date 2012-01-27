@@ -24,10 +24,10 @@
 
 
 int main(int argc, char** argv);
-static int init();
-static void update_logic();
+static int init(void);
+static void update_logic(void);
 static void reshape(int, int);
-static void render();
+static void render(void);
 static void mousemove(int, int);
 static void mousedownmove(int, int);
 static void keypress(unsigned char, int, int);
@@ -128,7 +128,7 @@ static void reshape(int w, int h) {
 
 static float cameraRotX = 0.0f, cameraRotY = 0.0f, cameraDist = 7.0f;
 static float cameraPosX = 0.0f, cameraPosY = 0.0f, cameraPosZ = 0.0f;
-static void setup_camera();
+static void setup_camera(void);
 static void render_tile(struct tile *t);
 
 static void render() {
