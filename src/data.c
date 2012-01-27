@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 
 #define TILE_THICKNESS 0.3f
 
@@ -67,7 +68,7 @@ static void calculate_normal(struct tile *tile) {
 static void fix_height(struct hole *hole) {
 	struct listnode *node;
 	struct tile *tile;
-	float miny;
+	float miny = FLT_MAX;
 	int i;
 	
 	/* step 1: determine the minimum height */
