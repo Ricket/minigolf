@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 2.0)
+PROJECT(Minigolf)
+
+INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR} ${GLU_INCLUDE_DIR} ${GLUT_INCLUDE_DIR})
+
+SET(Minigolf_SOURCE_FILES 
+	main.c
+	data.c
+	linkedlist.c
+	cuptee.c
+	)
+
+ADD_EXECUTABLE(Minigolf ${Minigolf_SOURCE_FILES})
+TARGET_LINK_LIBRARIES(Minigolf
+	${OPENGL_LIBRARIES} ${GLU_LIBRARIES} ${GLUT_LIBRARIES})
