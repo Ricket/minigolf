@@ -1,9 +1,16 @@
+#CMake files
 CMakeCache.txt
 CMakeFiles/
 *.cmake
 Makefile
 *.swp
 
+#Binaries
 Minigolf
 MinigolfTest
+
+#Visual Studio files
+*.user
+*.sdf
+*.suo
 
