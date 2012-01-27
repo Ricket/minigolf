@@ -45,8 +45,8 @@ static struct hole *hole;
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	
-	if(argc != 2) {
-		printf("Syntax: %s input_filename [GLUT_args]\n", argv[0]);
+	if(argc < 2) {
+		printf("Syntax: %s [GLUT_args] input_filename\n", argv[0]);
 		return 0;
 	}
 	
@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 	/* print_hole(hole); */
 	
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+	/* glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT); */
 	glutCreateWindow("Minigolf by Richard Carter");
 	glutIdleFunc(&update_logic);
 	glutDisplayFunc(&render);
