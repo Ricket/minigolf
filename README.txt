@@ -7,29 +7,32 @@ Richard Carter
 Windows:
   Windows 7, Vista, XP
   Visual Studio
+  GLUT for Win32 (can be found at http://user.xmission.com/~nate/glut.html)
 Mac/Linux:
   CMake
   CMake-compatible build tools (e.g. GCC and GNU Make)
 All:
-  OpenGL and GLUT libraries
+  OpenGL libraries
 
 
 == Compiling
 Windows:
-  Open the Visual Studio project file. Build the project.
+  Open the Visual Studio solution file (.sln) in /vs2010. Build the solution.
 Mac/Linux:
   Run `cmake .` to generate the Makefile. Run `make` to build the project.
 
 
 == Running
-Windows:
-  In Visual Studio, run the project.
+Windows - command line:
+  Open a command line (cmd.exe) and run Minigolf.exe (in the project folder).
+Windows - Visual Studio 2010:
+  In Visual Studio, set the Minigolf project as the startup project, then run.
 Mac/Linux:
   The binaries are placed in the project directory. `chmod +x Minigolf` if
   necessary, and then `./Minigolf` (or double-click the Minigolf binary).
 
 
-== Parameters
+== Arguments
 Minigolf [GLUT_args] input_filename
 
 GLUT_args:
