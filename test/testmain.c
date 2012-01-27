@@ -9,7 +9,7 @@
 
 #ifdef WIN32
 /* disable warning 'unreferenced formal parameter' */
-#pragma warning( disable : 4100 )
+#  pragma warning( disable : 4100 )
 #endif
 
 #include "testlinkedlist.h"

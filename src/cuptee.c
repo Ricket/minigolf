@@ -20,6 +20,10 @@
 #  include <GL/glut.h>
 #endif
 
+#ifndef GL_BGRA
+#  define GL_BGRA GL_BGRA_EXT
+#endif
+
 static GLuint textures[1];
 #define TEXTURE_CIRCLE 0
 #define NUM_TEXTURES 1
@@ -142,14 +146,14 @@ void initialize_textures() {
 		for(j = 0; j < CIRCLE_TEXTURE_SIZE; j++) {
 			if(cupsize_over_2_squared < (i-cupsize_over_2)*(i-cupsize_over_2) + (j-cupsize_over_2)*(j-cupsize_over_2)) {
 				/* alpha */
-				cupImg[j*CIRCLE_TEXTURE_SIZE+i] = 0xFFFFFF00;
+				cupImg[j*CIRCLE_TEXTURE_SIZE+i] = 0x00FFFFFF;
 			} else {
 				/* color */
 				cupImg[j*CIRCLE_TEXTURE_SIZE+i] = 0xFFFFFFFF;
 			}
 		}
 	}
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, CIRCLE_TEXTURE_SIZE, CIRCLE_TEXTURE_SIZE, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8, (void*)cupImg);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CIRCLE_TEXTURE_SIZE, CIRCLE_TEXTURE_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)cupImg);
 	
 	/* TODO does cupImg need to be freed? (can it be?) */
 	
