@@ -10,10 +10,12 @@
 #ifndef CUPTEE_H
 #define CUPTEE_H
 
+struct hole;
+
 struct cup;
 struct tee;
 
-void initialize_cuptee(void);
+void initialize_cuptee(struct hole *);
 void draw_cup(struct cup *);
 void draw_tee(struct tee *);
 

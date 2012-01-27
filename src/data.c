@@ -57,7 +57,7 @@ static void calculate_normal(struct tile *tile) {
 		tile->norm_z = x1 * y2 - y1 * x2;
 		
 		/* normalize */
-		len = sqrt( (tile->norm_x * tile->norm_x) + (tile->norm_y * tile->norm_y) + (tile->norm_z * tile->norm_z) );
+		len = (float) sqrt( (tile->norm_x * tile->norm_x) + (tile->norm_y * tile->norm_y) + (tile->norm_z * tile->norm_z) );
 		tile->norm_x /= len;
 		tile->norm_y /= len;
 		tile->norm_z /= len;
