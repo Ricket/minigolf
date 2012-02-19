@@ -3,7 +3,7 @@
  * Cup and tee functions; create the OpenGL texture(s) and draw the quads.
  *
  * Richard Carter
- * 2012/02/17
+ * 2012/02/19
  * CSC 462 Assignment 2: Ball Physics
  */
 

@@ -4,12 +4,12 @@
  * data structures for holding this data.
  *
  * Richard Carter
- * 2012/02/17
+ * 2012/02/19
  * CSC 462 Assignment 2: Ball Physics
  */
 
-#ifndef TILE_H
-#define TILE_H
+#ifndef DATA_H
+#define DATA_H
 
 #include "linkedlist.h"
 

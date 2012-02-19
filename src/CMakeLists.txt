@@ -8,6 +8,7 @@ SET(Minigolf_SOURCE_FILES
 	data.c
 	linkedlist.c
 	objects.c
+	physics.c
 	)
 
 ADD_EXECUTABLE(Minigolf ${Minigolf_SOURCE_FILES})

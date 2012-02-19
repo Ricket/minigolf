@@ -3,7 +3,7 @@
  * Main entry point, setup, rendering, user input.
  *
  * Richard Carter
- * 2012/02/17
+ * 2012/02/19
  * CSC 462 Assignment 2: Ball Physics
  */
 
@@ -150,7 +150,6 @@ static void update_logic() {
 	int currentTime = glutGet(GLUT_ELAPSED_TIME);
 	bool shouldRender = false;
 	float newv[3];
-	float vmag;
 	pendingDelta += currentTime - lastUpdate;
 	
 	lastUpdate = currentTime;
