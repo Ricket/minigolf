@@ -62,6 +62,17 @@ static void calculate_normal(struct tile *tile) {
 		tile->norm_x /= len;
 		tile->norm_y /= len;
 		tile->norm_z /= len;
+		
+		/* calculate rotation matrix */
+		tile->rotMat[0][0] = cos(ARROW_SPIN_SPEED) + tile->norm_x*tile->norm_x*(1-cos(ARROW_SPIN_SPEED));
+		tile->rotMat[0][1] = tile->norm_x*tile->norm_y*(1-cos(ARROW_SPIN_SPEED)) - tile->norm_z*sin(ARROW_SPIN_SPEED);
+		tile->rotMat[0][2] = tile->norm_x*tile->norm_z*(1-cos(ARROW_SPIN_SPEED)) + tile->norm_y*sin(ARROW_SPIN_SPEED);
+		tile->rotMat[1][0] = tile->norm_y*tile->norm_x*(1-cos(ARROW_SPIN_SPEED)) + tile->norm_z*sin(ARROW_SPIN_SPEED);
+		tile->rotMat[1][1] = cos(ARROW_SPIN_SPEED) + tile->norm_y*tile->norm_y*(1-cos(ARROW_SPIN_SPEED));
+		tile->rotMat[1][2] = tile->norm_y*tile->norm_z*(1-cos(ARROW_SPIN_SPEED)) - tile->norm_x*sin(ARROW_SPIN_SPEED);
+		tile->rotMat[2][0] = tile->norm_z*tile->norm_x*(1-cos(ARROW_SPIN_SPEED)) - tile->norm_y*sin(ARROW_SPIN_SPEED);
+		tile->rotMat[2][1] = tile->norm_z*tile->norm_y*(1-cos(ARROW_SPIN_SPEED)) + tile->norm_x*sin(ARROW_SPIN_SPEED);
+		tile->rotMat[2][2] = cos(ARROW_SPIN_SPEED) + tile->norm_z*tile->norm_z*(1-cos(ARROW_SPIN_SPEED));
 	}
 }
 
@@ -102,6 +113,51 @@ static void fix_height(struct hole *hole) {
 	hole->cup->y = hole->cup->y - miny + TILE_THICKNESS;
 	
 	/* now the tile's lowest point is y=1.0f */
+}
+
+static struct tile * get_tile_by_id(int id, struct linkedlist *tiles) {
+	if(id == 0) {
+		return NULL;
+	}
+	
+	struct listnode *node = tiles->first;
+	
+	while(node != NULL) {
+		if(((struct tile *)node->ptr)->id == id) {
+			break;
+		}
+		node = node->next;
+	}
+	
+	if(node != NULL) {
+		return (struct tile *)node->ptr;
+	} else {
+		printf("Warning: tile id not found: %d\n", id);
+		return NULL;
+	}
+}
+
+static void find_tile_pointers(struct hole *hole) {
+	struct listnode *node = hole->tiles->first;
+	struct tile *tile;
+	int i;
+	
+	/* tile_neighbors */
+	while(node != NULL) {
+		tile = (struct tile *)node->ptr;
+		
+		for(i = 0; i < tile->num_edges; i++) {
+			tile->neighbors[i].tile = get_tile_by_id(tile->neighbors[i].id, hole->tiles);
+		}
+		
+		node = node->next;
+	}
+	
+	/* tee */
+	hole->tee->tile = get_tile_by_id(hole->tee->tile_id, hole->tiles);
+	
+	/* cup */
+	hole->cup->tile = get_tile_by_id(hole->cup->tile_id, hole->tiles);
 }
 
 struct hole * load_hole(char *filename) {
@@ -191,6 +247,7 @@ struct hole * load_hole(char *filename) {
 		
 		/* postprocessing */
 		fix_height(hole);
+		find_tile_pointers(hole);
 		
 		return hole;
 	}

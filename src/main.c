@@ -3,8 +3,8 @@
  * Main entry point, setup, rendering, user input.
  *
  * Richard Carter
- * 2012/01/27
- * CSC 462 Assignment 1: Minigolf Rendering
+ * 2012/02/17
+ * CSC 462 Assignment 2: Ball Physics
  */
 
 #ifdef _WIN32
@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <limits.h>
 #include <math.h>
 #define PI 3.14159265f
@@ -25,7 +26,15 @@
 #endif
 
 #include "data.h"
-#include "cuptee.h"
+#include "objects.h"
+
+#ifndef max
+	#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
+#endif
+
+#ifndef min
+	#define min( a, b ) ( ((a) < (b)) ? (a) : (b) )
+#endif
 
 
 int main(int argc, char** argv);
@@ -33,6 +42,7 @@ static int init(void);
 static void update_logic(void);
 static void reshape(int, int);
 static void render(void);
+static void mouseclick(int, int, int, int);
 static void mousemove(int, int);
 static void mousedownmove(int, int);
 static void keypress(unsigned char, int, int);
@@ -44,8 +54,21 @@ static void keypress_special(int, int, int);
 #define MOUSE_SPEED_X (1.0f / 2.0f)
 #define MOUSE_SPEED_Y (-1.0f / 3.0f)
 
+#define ARROW_LENGTH_SPEED 0.03f
+#define MIN_ARROW_LENGTH 0.1f
+#define MAX_ARROW_LENGTH 2.0f
+
+#define FRICTION 0.01f
+
+enum gamestate {
+	GAMESTATE_BALLDIRECTION,
+	GAMESTATE_BALLVELOCITY,
+	GAMESTATE_BALLMOVING
+};
 
 static struct hole *hole;
+static struct ball *ball;
+static enum gamestate gameState = 0;
 
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
@@ -57,6 +80,7 @@ int main(int argc, char** argv) {
 	
 	hole = load_hole(argv[1]);
 	/* print_hole(hole); */
+	ball = make_ball(hole->tee);
 	
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	/* glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT); */
@@ -64,6 +88,7 @@ int main(int argc, char** argv) {
 	glutIdleFunc(&update_logic);
 	glutDisplayFunc(&render);
 	glutReshapeFunc(&reshape);
+	glutMouseFunc(&mouseclick);
 	glutMotionFunc(&mousedownmove);
 	glutPassiveMotionFunc(&mousemove);
 	glutKeyboardFunc(&keypress);
@@ -94,7 +119,7 @@ static int init() {
 	
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glShadeModel(GL_SMOOTH);
@@ -117,8 +142,65 @@ static int init() {
     return 1;
 }
 
+static int lastUpdate = 0;
+static int pendingDelta = 0;
+static float arrowLengthV = ARROW_LENGTH_SPEED;
+
 static void update_logic() {
+	int currentTime = glutGet(GLUT_ELAPSED_TIME);
+	bool shouldRender = false;
+	float newv[3];
+	float vmag;
+	pendingDelta += currentTime - lastUpdate;
 	
+	lastUpdate = currentTime;
+	if(pendingDelta > 16) {
+		shouldRender = true;
+	}
+	
+	while(pendingDelta > 16) {
+		/* TICK */
+		if(gameState == GAMESTATE_BALLDIRECTION) {
+			/* rotate the ball's velocity slightly around the tile norm */
+			newv[0] = ball->tile->rotMat[0][0]*ball->dx + ball->tile->rotMat[1][0]*ball->dy + ball->tile->rotMat[2][0]*ball->dz;
+			newv[1] = ball->tile->rotMat[0][1]*ball->dx + ball->tile->rotMat[1][1]*ball->dy + ball->tile->rotMat[2][1]*ball->dz;
+			newv[2] = ball->tile->rotMat[0][2]*ball->dx + ball->tile->rotMat[1][2]*ball->dy + ball->tile->rotMat[2][2]*ball->dz;
+			ball->dx = newv[0];
+			ball->dy = newv[1];
+			ball->dz = newv[2];
+		}
+		else if(gameState == GAMESTATE_BALLVELOCITY) {
+			/* increase/loop the ball's velocity slightly */
+			ball->speed += arrowLengthV;
+			if(ball->speed > MAX_ARROW_LENGTH) {
+				ball->speed = MAX_ARROW_LENGTH - (ball->speed - MAX_ARROW_LENGTH);
+				arrowLengthV = -arrowLengthV;
+			} else if(ball->speed < MIN_ARROW_LENGTH) {
+				ball->speed = MIN_ARROW_LENGTH - (ball->speed - MIN_ARROW_LENGTH);
+				arrowLengthV = -arrowLengthV;
+			}
+		}
+		else if(gameState == GAMESTATE_BALLMOVING) {
+			/* move the ball, account for friction */
+			ball->x += ball->dx * ball->speed * 0.02f;
+			ball->y += ball->dy * ball->speed * 0.02f;
+			ball->z += ball->dz * ball->speed * 0.02f;
+			
+			ball->speed = max(ball->speed - FRICTION, 0.0f);
+			
+			if(ball->speed == 0.0f) {
+				gameState = GAMESTATE_BALLDIRECTION;
+				reset_ball(ball, NULL);
+			}
+		}
+		/* /TICK */
+		
+		pendingDelta -= 16;
+	}
+	
+	if(shouldRender) {
+		glutPostRedisplay();
+	}
 }
 
 static void reshape(int w, int h) {
@@ -152,6 +234,26 @@ static void render() {
 	
 	draw_cup(hole->cup);
 	draw_tee(hole->tee);
+	
+	/* find ball tile and draw ball */
+	node = hole->tiles->first;
+	while(node != NULL) {
+		if(((struct tile *)node->ptr)->id == ball->tile_id) {
+			break;
+		}
+		node = node->next;
+	}
+	if(node != NULL) {
+		update_ball(ball, (struct tile *)node->ptr);
+	} else {
+		printf("Warning: ball tile not found\n");
+	}
+	
+	draw_ball(ball);
+	
+	if(gameState == GAMESTATE_BALLDIRECTION || gameState == GAMESTATE_BALLVELOCITY) {
+		draw_arrow();
+	}
 
     glutSwapBuffers();
 }
@@ -243,6 +345,14 @@ static void render_tile(struct tile *t) {
 	glEnd();
 }
 
+static void mouseclick(int button, int state, int x, int y) {
+	if(state == GLUT_DOWN && button == GLUT_LEFT_BUTTON) {
+		if(gameState != GAMESTATE_BALLMOVING) {
+			gameState = (gameState + 1) % 3;
+		}
+	}
+}
+
 static int lastx = INT_MIN, lasty = INT_MIN;
 
 static void mousemove(int x, int y) {
@@ -260,8 +370,8 @@ static void mousedownmove(int x, int y) {
 	}
 	if((y-lasty) != 0) {
 		cameraRotY += (y-lasty) * MOUSE_SPEED_Y;
-		if(cameraRotY > 180.0f) cameraRotY = 179.99f;
-		else if(cameraRotY < 0.0f) cameraRotY = 0.01f;
+		if(cameraRotY > 70.0f) cameraRotY = 69.99f;
+		else if(cameraRotY < 10.0f) cameraRotY = 10.01f;
 		/* glRotatef((float)(y-lasty), 1,0,0); */
 	}
 

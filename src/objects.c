@@ -42,9 +42,10 @@ static GLuint textures[NUM_TEXTURES];
 #define TEE_3D_SIZE 0.04f
 #define ARROW_3D_SIZE 0.3f
 
-#define BALL_INITIAL_VX 0.0f
-#define BALL_INITIAL_VY 0.0f
-#define BALL_INITIAL_VZ 1.0f
+#define BALL_INITIAL_DX 0.0f
+#define BALL_INITIAL_DY 0.0f
+#define BALL_INITIAL_DZ 1.0f
+#define BALL_INITIAL_SPEED 1.0f
 
 struct quad {
 	float pt[4][3];
@@ -250,25 +251,29 @@ void draw_tee(struct tee *t) {
 struct ball *make_ball(struct tee *tee) {
 	struct ball *ret = (struct ball *) calloc(1, sizeof(struct ball));
 	ret->tile_id = tee->tile_id;
+	ret->tile = tee->tile;
 	ret->x = tee->x+0.1f;
 	ret->y = tee->y;
 	ret->z = tee->z;
-	ret->vx = BALL_INITIAL_VX;
-	ret->vy = BALL_INITIAL_VY;
-	ret->vz = BALL_INITIAL_VZ;
+	ret->dx = BALL_INITIAL_DX;
+	ret->dy = BALL_INITIAL_DY;
+	ret->dz = BALL_INITIAL_DZ;
+	ret->speed = BALL_INITIAL_SPEED;
 	return ret;
 }
 
 void reset_ball(struct ball *ball, struct tee *tee) {
 	if(tee != NULL) {
 		ball->tile_id = tee->tile_id;
+		ball->tile = tee->tile;
 		ball->x = tee->x;
 		ball->y = tee->y;
 		ball->z = tee->z;
 	}
-	ball->vx = BALL_INITIAL_VX;
-	ball->vy = BALL_INITIAL_VY;
-	ball->vz = BALL_INITIAL_VZ;
+	ball->dx = BALL_INITIAL_DX;
+	ball->dy = BALL_INITIAL_DY;
+	ball->dz = BALL_INITIAL_DZ;
+	ball->speed = BALL_INITIAL_SPEED;
 }
 
 void update_ball(struct ball *ball, struct tile *tile) {
@@ -307,11 +312,10 @@ void update_ball(struct ball *ball, struct tile *tile) {
 	
 	/* TODO create arrowquad based on the arrow's rotation and the vectors */
 	
-	vy[0] = ball->vx;
-	vy[1] = ball->vy;
-	vy[2] = ball->vz;
+	vy[0] = ball->dx * ball->speed;
+	vy[1] = ball->dy * ball->speed;
+	vy[2] = ball->dz * ball->speed;
 	
-	mag = sqrt(vy[0]*vy[0] + vy[1]*vy[1] + vy[2]*vy[2]);
 	for(i = 0; i < 3; i++) {
 		vy[i] = vy[i] * ARROW_3D_SIZE;
 	}

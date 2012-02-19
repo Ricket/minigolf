@@ -22,7 +22,9 @@ void draw_tee(struct tee *);
 struct ball {
 	int tile_id;
 	float x,y,z;
-	float vx,vy,vz;
+	float dx,dy,dz,speed;
+	
+	struct tile *tile;
 };
 
 struct ball *make_ball(struct tee *);

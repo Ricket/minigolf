@@ -7,7 +7,7 @@ SET(Minigolf_SOURCE_FILES
 	main.c
 	data.c
 	linkedlist.c
-	cuptee.c
+	objects.c
 	)
 
 ADD_EXECUTABLE(Minigolf ${Minigolf_SOURCE_FILES})
