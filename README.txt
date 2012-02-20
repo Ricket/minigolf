@@ -1,6 +1,6 @@
-CSC 462 Assignment 1: Minigolf Rendering
+CSC 462 Assignment 2: Ball Physics
 Richard Carter
-2012/01/27
+2012/02/19
 
 
 == System Requirements
@@ -44,7 +44,23 @@ input_filename:
 
 
 == Usage
-Click and drag the left mouse button to rotate (orbit) around the hole.
+Click and drag the right mouse button to rotate (orbit) around the hole.
 Use the arrow keys to translate the hole along the XZ plane.
 Use the quotation (") and question mark (?) keys to raise and lower the hole.
 Press the escape key to exit.
+
+When the arrow is spinning, click the left mouse button to select direction.
+When the arrow is expanding and contracting, click the left mouse button to
+select speed and fire the ball.
+
+== Known bugs/shortcomings
+After some number of hits, and depending on your machine architecture, the ball
+will sometimes end up disappearing below the top of a tile. Or, the ball will
+not correctly collide with the edge of two tiles and the program will enter an
+infinite loop. This bug is due to floating point inaccuracy and to my 
+implementation of the ball's position. I did not have time to fix it (as that
+would require adjusting every bit of ball interaction code for a new coordinate
+system) but intend on doing so before the next assignment submission.
+
+Gravity is not implemented. I intend on remedying this by the next assignment
+submission.
