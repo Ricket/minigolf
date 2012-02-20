@@ -60,6 +60,7 @@ static void keypress_special(int, int, int);
 #define MAX_ARROW_LENGTH 2.0f
 
 #define FRICTION 0.01f
+#define GRAVITY_MAGNITUDE 0.05f
 
 enum gamestate {
 	GAMESTATE_BALLDIRECTION,
@@ -182,6 +183,17 @@ static void update_logic() {
 			}
 		}
 		else if(gameState == GAMESTATE_BALLMOVING) {
+			/* apply gravity to ball->speed */
+			/*
+			ball->speed -= GRAVITY_MAGNITUDE * sqrt(ball->tile->norm_z*ball->tile->norm_z + ball->tile->norm_x*ball->tile->norm_x);
+			if(ball->speed < 0.0f) {
+				ball->speed = -ball->speed;
+				ball->dx = -ball->dx;
+				ball->dy = -ball->dy;
+				ball->dz = -ball->dz;
+			}
+			*/
+			
 			/* move the ball, account for friction */
 			ball->x += ball->dx * ball->speed * 0.02f;
 			ball->y += ball->dy * ball->speed * 0.02f;
@@ -189,19 +201,24 @@ static void update_logic() {
 			
 			ball->speed = max(ball->speed - FRICTION, 0.0f);
 
+			/* if ball exits current tile, bounce or switch tiles */
 			while(!ball_in_tile(ball)) {
 				/* reflect or switch tiles */
 				closestEdge = get_closest_edge(ball);
 				
 				if(ball->tile->neighbors[closestEdge].id == 0) {
-					printf("No neighbor this way\n");
+					printf("*bounce*\n");
 					bounce_ball(ball, closestEdge);
 				} else {
-					printf("Has neighbor; for now, bouncing anyway\n");
+					printf("*cross into new tile*\n");
 					transfer_ball(ball, closestEdge);
 				}
 			}
 			
+			/* check if ball is sinking into cup */
+			/* TODO!! */
+			
+			/* when ball comes to a stop, go back to direction selection */
 			if(ball->speed == 0.0f) {
 				gameState = GAMESTATE_BALLDIRECTION;
 				/* printf("ball closest to edge %d\n", get_closest_edge(ball)); */
