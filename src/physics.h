@@ -10,7 +10,7 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#include <stdbool.h>
+#define bool int
 
 struct ball;
 

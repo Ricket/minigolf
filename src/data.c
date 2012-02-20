@@ -179,11 +179,13 @@ static void fix_height(struct hole *hole) {
 }
 
 static struct tile * get_tile_by_id(int id, struct linkedlist *tiles) {
+	struct listnode *node;
+	
 	if(id == 0) {
 		return NULL;
 	}
 	
-	struct listnode *node = tiles->first;
+	node = tiles->first;
 	
 	while(node != NULL) {
 		if(((struct tile *)node->ptr)->id == id) {

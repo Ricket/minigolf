@@ -14,7 +14,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
+#define bool int
+#define true 1
+#define false 0
 #include <limits.h>
 #include <math.h>
 #define PI 3.14159265f
@@ -61,6 +63,9 @@ static void keypress_special(int, int, int);
 
 #define FRICTION 0.01f
 #define GRAVITY_MAGNITUDE 0.05f
+
+#define CUP_VICINITY 0.10f
+#define CUP_FALLIN 100.0f
 
 enum gamestate {
 	GAMESTATE_BALLDIRECTION,
@@ -153,6 +158,8 @@ static void update_logic() {
 	bool shouldRender = false;
 	float newv[3];
 	int closestEdge;
+	float dist, dotprod, mag;
+	float dx, dy, dz;
 	pendingDelta += currentTime - lastUpdate;
 	
 	lastUpdate = currentTime;
@@ -207,19 +214,49 @@ static void update_logic() {
 				closestEdge = get_closest_edge(ball);
 				
 				if(ball->tile->neighbors[closestEdge].id == 0) {
-					printf("*bounce*\n");
+					/* printf("*bounce*\n"); */
 					bounce_ball(ball, closestEdge);
 				} else {
-					printf("*cross into new tile*\n");
+					/* printf("*cross into new tile*\n"); */
 					transfer_ball(ball, closestEdge);
 				}
 			}
 			
 			/* check if ball is sinking into cup */
-			/* TODO!! */
+			if(ball->tile == hole->cup->tile) {
+				/* distance squared */
+				dist = (ball->x - hole->cup->x)*(ball->x - hole->cup->x) + (ball->y - hole->cup->y)*(ball->y - hole->cup->y) + (ball->z - hole->cup->z)*(ball->z - hole->cup->z);
+				if(dist <= CUP_VICINITY * CUP_VICINITY) {
+					if(ball->speed - CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist) < 0) {
+						printf("Winner!\n");
+						ball->speed = 0.0f;
+						ball->x = hole->cup->x;
+						ball->y = hole->cup->y;
+						ball->z = hole->cup->z;
+					} else {
+						dotprod = (ball->dx * (hole->cup->x - ball->x)) + (ball->dy * (hole->cup->y - ball->y)) + (ball->dz * (hole->cup->z - ball->z));
+						if(dotprod <= 0.0f) {
+							/* ball is heading away from cup */
+							/*printf("Heading away at speed %f\n", ball->speed);
+							printf("CUP_FALLIN value = %f\n", CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist)); */
+							/* set its direction directly away from cup */
+							dx = -(hole->cup->x - ball->x);
+							dy = -(hole->cup->y - ball->y);
+							dz = -(hole->cup->z - ball->z);
+							mag = sqrt(dx * dx + dy * dy + dz * dz);
+							if(mag > 0.002f) {
+								ball->dx = dx/mag;
+								ball->dy = dy/mag;
+								ball->dz = dz/mag;
+							}
+						}
+					}
+				}
+			}
 			
 			/* when ball comes to a stop, go back to direction selection */
 			if(ball->speed == 0.0f) {
+				ball->speed = 0;
 				gameState = GAMESTATE_BALLDIRECTION;
 				/* printf("ball closest to edge %d\n", get_closest_edge(ball)); */
 				reset_ball(ball, NULL);
