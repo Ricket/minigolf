@@ -38,12 +38,15 @@ struct tile {
 	int num_edges;
 	struct tile_vertex *vertices;
 	struct tile_neighbor *neighbors;
+	float **edgeRotMat; /* array of matrices of rotation around the edges */
 
 	float norm_x, norm_y, norm_z;
 	
-	float rotMat[3][3]; /* matrix of rotation ARROW_SPIN_SPEED degrees around norm */
-	/* Note rotMat uses mathematical matrix indexing; that is, rotMat[1][2] is
+	/* Note matrices use mathematical matrix indexing; that is, mat[1][2] is
 	   the element in the second row, third column. */
+	float rotMat[3][3]; /* matrix of rotation ARROW_SPIN_SPEED degrees around norm */
+	float projMat[3][3]; /* matrix of rotation to bring tile's verts along XY axis */
+	struct tile_vertex *proj_vertices;
 };
 
 struct tile_vertex {

@@ -27,6 +27,7 @@
 
 #include "data.h"
 #include "objects.h"
+#include "physics.h"
 
 #ifndef max
 	#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
@@ -150,6 +151,7 @@ static void update_logic() {
 	int currentTime = glutGet(GLUT_ELAPSED_TIME);
 	bool shouldRender = false;
 	float newv[3];
+	int closestEdge;
 	pendingDelta += currentTime - lastUpdate;
 	
 	lastUpdate = currentTime;
@@ -186,9 +188,23 @@ static void update_logic() {
 			ball->z += ball->dz * ball->speed * 0.02f;
 			
 			ball->speed = max(ball->speed - FRICTION, 0.0f);
+
+			while(!ball_in_tile(ball)) {
+				/* reflect or switch tiles */
+				closestEdge = get_closest_edge(ball);
+				
+				if(ball->tile->neighbors[closestEdge].id == 0) {
+					printf("No neighbor this way\n");
+					bounce_ball(ball, closestEdge);
+				} else {
+					printf("Has neighbor; for now, bouncing anyway\n");
+					transfer_ball(ball, closestEdge);
+				}
+			}
 			
 			if(ball->speed == 0.0f) {
 				gameState = GAMESTATE_BALLDIRECTION;
+				/* printf("ball closest to edge %d\n", get_closest_edge(ball)); */
 				reset_ball(ball, NULL);
 			}
 		}

@@ -27,6 +27,9 @@ struct ball {
 	struct tile *tile;
 };
 
+float get_ball_px(struct ball *);
+float get_ball_pz(struct ball *);
+
 struct ball *make_ball(struct tee *);
 
 /*

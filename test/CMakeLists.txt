@@ -6,8 +6,11 @@ INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR} ${GLU_INCLUDE_DIR} ${GLUT_INCLUDE_DIR}
 SET(MinigolfTest_SOURCE_FILES 
 	testmain.c
 	testlinkedlist.c
+	testphysics.c
 	
 	../src/linkedlist.c
+	../src/physics.c
+	../src/objects.c
 	)
 	
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/test ${PROJECT_SOURCE_DIR}/src)

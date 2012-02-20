@@ -3,8 +3,8 @@
  * Test cases for the linkedlist functions and data structures.
  *
  * Richard Carter
- * 2012/01/27
- * CSC 462 Assignment 1: Minigolf Rendering
+ * 2012/02/19
+ * CSC 462 Assignment 2: Ball Physics
  */
 
 #include "testlinkedlist.h"
@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-void printf_linkedlist_int(struct linkedlist *list);
+static void printf_linkedlist_int(struct linkedlist *list);
 
 
 void test_linkedlist() {
@@ -83,7 +83,7 @@ void test_linkedlist() {
 	free(list1);
 }
 
-void printf_linkedlist_int(struct linkedlist *list) {
+static void printf_linkedlist_int(struct linkedlist *list) {
 	struct listnode *node;
 	
 	if(list == NULL) {

@@ -42,9 +42,6 @@ static GLuint textures[NUM_TEXTURES];
 #define TEE_3D_SIZE 0.04f
 #define ARROW_3D_SIZE 0.3f
 
-#define BALL_INITIAL_DX 0.0f
-#define BALL_INITIAL_DY 0.0f
-#define BALL_INITIAL_DZ 1.0f
 #define BALL_INITIAL_SPEED 1.0f
 
 struct quad {
@@ -248,17 +245,20 @@ void draw_tee(struct tee *t) {
 	glDisable(GL_TEXTURE_2D);
 }
 
+float get_ball_px(struct ball *ball) {
+	return ball->tile->projMat[0][0]*ball->x + ball->tile->projMat[1][0]*ball->y + ball->tile->projMat[2][0]*ball->z;
+}
+
+float get_ball_pz(struct ball *ball) {
+	return ball->tile->projMat[0][2]*ball->x + ball->tile->projMat[1][2]*ball->y + ball->tile->projMat[2][2]*ball->z;
+}
+
 struct ball *make_ball(struct tee *tee) {
 	struct ball *ret = (struct ball *) calloc(1, sizeof(struct ball));
-	ret->tile_id = tee->tile_id;
-	ret->tile = tee->tile;
-	ret->x = tee->x+0.1f;
-	ret->y = tee->y;
-	ret->z = tee->z;
-	ret->dx = BALL_INITIAL_DX;
-	ret->dy = BALL_INITIAL_DY;
-	ret->dz = BALL_INITIAL_DZ;
-	ret->speed = BALL_INITIAL_SPEED;
+	reset_ball(ret, tee);
+	ret->dx = 1.0f;
+	ret->dy = 0.0f;
+	ret->dz = 0.0f;
 	return ret;
 }
 
@@ -270,9 +270,7 @@ void reset_ball(struct ball *ball, struct tee *tee) {
 		ball->y = tee->y;
 		ball->z = tee->z;
 	}
-	ball->dx = BALL_INITIAL_DX;
-	ball->dy = BALL_INITIAL_DY;
-	ball->dz = BALL_INITIAL_DZ;
+	
 	ball->speed = BALL_INITIAL_SPEED;
 }
 
@@ -365,6 +363,7 @@ void draw_ball(struct ball *ball) {
 void draw_arrow() {
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
 	
 	glColor3f(0.8f, 0.0f, 0.0f); /* color the arrow red */
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ARROW]);
@@ -375,6 +374,7 @@ void draw_arrow() {
 	glTexCoord2f(1.0f, 1.0f); glVertex3f(arrowquad.pt[3][0], arrowquad.pt[3][1], arrowquad.pt[3][2]);
 	glEnd();
 	
+	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
 }

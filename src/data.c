@@ -62,17 +62,80 @@ static void calculate_normal(struct tile *tile) {
 		tile->norm_x /= len;
 		tile->norm_y /= len;
 		tile->norm_z /= len;
+	}
+}
+
+static void calculate_matrices(struct tile *tile) {
+	float cosArrowSpinSpeed = cos(ARROW_SPIN_SPEED), sinArrowSpinSpeed = sin(ARROW_SPIN_SPEED);
+	float u[3], umag, theta, cosTheta, sinTheta;
+	int i,j;
+	struct tile_vertex *v, *pv;
+	
+	/* calculate rotation matrix */
+	tile->rotMat[0][0] = cosArrowSpinSpeed + tile->norm_x*tile->norm_x*(1-cosArrowSpinSpeed);
+	tile->rotMat[0][1] = tile->norm_x*tile->norm_y*(1-cosArrowSpinSpeed) - tile->norm_z*sinArrowSpinSpeed;
+	tile->rotMat[0][2] = tile->norm_x*tile->norm_z*(1-cosArrowSpinSpeed) + tile->norm_y*sinArrowSpinSpeed;
+	tile->rotMat[1][0] = tile->norm_y*tile->norm_x*(1-cosArrowSpinSpeed) + tile->norm_z*sinArrowSpinSpeed;
+	tile->rotMat[1][1] = cosArrowSpinSpeed + tile->norm_y*tile->norm_y*(1-cosArrowSpinSpeed);
+	tile->rotMat[1][2] = tile->norm_y*tile->norm_z*(1-cosArrowSpinSpeed) - tile->norm_x*sinArrowSpinSpeed;
+	tile->rotMat[2][0] = tile->norm_z*tile->norm_x*(1-cosArrowSpinSpeed) - tile->norm_y*sinArrowSpinSpeed;
+	tile->rotMat[2][1] = tile->norm_z*tile->norm_y*(1-cosArrowSpinSpeed) + tile->norm_x*sinArrowSpinSpeed;
+	tile->rotMat[2][2] = cosArrowSpinSpeed + tile->norm_z*tile->norm_z*(1-cosArrowSpinSpeed);
+	
+	/* calculate projection matrix */
+	/* u = norm x (0,0,1) */
+	u[0] = tile->norm_y;
+	u[1] = -tile->norm_x;
+	u[2] = 0;
+	umag = sqrt(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
+	theta = asin(umag);
+	cosTheta = cos(theta);
+	sinTheta = sin(theta);
+	tile->projMat[0][0] = 1;
+	tile->projMat[0][1] = 0;
+	tile->projMat[0][2] = 0;
+	tile->projMat[1][0] = 0;
+	tile->projMat[1][1] = 0;
+	tile->projMat[1][2] = 0;
+	tile->projMat[2][0] = 0;
+	tile->projMat[2][1] = 0;
+	tile->projMat[2][2] = 1;
+	
+	/* make projected vertices */
+	tile->proj_vertices = (struct tile_vertex *) calloc(tile->num_edges, sizeof(struct tile_vertex));
+	for(i = 0; i < tile->num_edges; i++) {
+		v = &(tile->vertices[i]);
+		pv = &(tile->proj_vertices[i]);
+		pv->x = tile->projMat[0][0]*v->x + tile->projMat[1][0]*v->y + tile->projMat[2][0]*v->z;
+		pv->y = tile->projMat[0][1]*v->x + tile->projMat[1][1]*v->y + tile->projMat[2][1]*v->z;
+		pv->z = tile->projMat[0][2]*v->x + tile->projMat[1][2]*v->y + tile->projMat[2][2]*v->z;
+	}
+	
+	/* calculate edge rotation matrices */
+	tile->edgeRotMat = (float **) calloc(tile->num_edges, sizeof(float *));
+	for(i = 0; i < tile->num_edges; i++) {
+		tile->edgeRotMat[i] = (float *) calloc(9, sizeof(float));
 		
-		/* calculate rotation matrix */
-		tile->rotMat[0][0] = cos(ARROW_SPIN_SPEED) + tile->norm_x*tile->norm_x*(1-cos(ARROW_SPIN_SPEED));
-		tile->rotMat[0][1] = tile->norm_x*tile->norm_y*(1-cos(ARROW_SPIN_SPEED)) - tile->norm_z*sin(ARROW_SPIN_SPEED);
-		tile->rotMat[0][2] = tile->norm_x*tile->norm_z*(1-cos(ARROW_SPIN_SPEED)) + tile->norm_y*sin(ARROW_SPIN_SPEED);
-		tile->rotMat[1][0] = tile->norm_y*tile->norm_x*(1-cos(ARROW_SPIN_SPEED)) + tile->norm_z*sin(ARROW_SPIN_SPEED);
-		tile->rotMat[1][1] = cos(ARROW_SPIN_SPEED) + tile->norm_y*tile->norm_y*(1-cos(ARROW_SPIN_SPEED));
-		tile->rotMat[1][2] = tile->norm_y*tile->norm_z*(1-cos(ARROW_SPIN_SPEED)) - tile->norm_x*sin(ARROW_SPIN_SPEED);
-		tile->rotMat[2][0] = tile->norm_z*tile->norm_x*(1-cos(ARROW_SPIN_SPEED)) - tile->norm_y*sin(ARROW_SPIN_SPEED);
-		tile->rotMat[2][1] = tile->norm_z*tile->norm_y*(1-cos(ARROW_SPIN_SPEED)) + tile->norm_x*sin(ARROW_SPIN_SPEED);
-		tile->rotMat[2][2] = cos(ARROW_SPIN_SPEED) + tile->norm_z*tile->norm_z*(1-cos(ARROW_SPIN_SPEED));
+		v = &(tile->vertices[i]);
+		pv = &(tile->vertices[(i+1) % tile->num_edges]);
+
+		u[0] = pv->x - v->x;
+		u[1] = pv->y - v->y;
+		u[2] = pv->z - v->z;
+		umag = sqrt(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
+		for(j = 0; j < 3; j++) {
+			u[j] = u[j] / umag;
+		}
+		
+		tile->edgeRotMat[i][0] = 2*u[0]*u[0]-1;
+		tile->edgeRotMat[i][1] = 2*u[0]*u[1];
+		tile->edgeRotMat[i][2] = 2*u[0]*u[2];
+		tile->edgeRotMat[i][3] = 2*u[0]*u[1];
+		tile->edgeRotMat[i][4] = 2*u[1]*u[1]-1;
+		tile->edgeRotMat[i][5] = 2*u[1]*u[2];
+		tile->edgeRotMat[i][6] = 2*u[0]*u[2];
+		tile->edgeRotMat[i][7] = 2*u[1]*u[2];
+		tile->edgeRotMat[i][8] = 2*u[2]*u[2]-1;
 	}
 }
 
@@ -207,6 +270,7 @@ struct hole * load_hole(char *filename) {
 				}
 				
 				calculate_normal(tile);
+				calculate_matrices(tile);
 				
 				ll_push_back(hole->tiles, tile);
 				tile = NULL;

@@ -12,6 +12,14 @@
 
 #include <stdbool.h>
 
-bool pnpoly(int nvert, float *vertx, float *verty, float testx, float testy);
+struct ball;
+
+bool ball_in_tile(struct ball *);
+int get_closest_edge(struct ball *);
+void bounce_ball(struct ball *, int);
+void transfer_ball(struct ball *, int);
+
+
+void physics_test_static_functions();
 
 #endif
