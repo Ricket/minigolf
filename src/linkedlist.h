@@ -3,8 +3,8 @@
  * Linked list function declarations and data structures.
  *
  * Richard Carter
- * 2012/01/27
- * CSC 462 Assignment 1: Minigolf Rendering
+ * 2012/02/19
+ * CSC 462 Assignment 2: Ball Physics
  */
 
 #ifndef LINKEDLIST_H
