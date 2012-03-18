@@ -409,6 +409,12 @@ static void render_tile(struct tile *t) {
 			glVertex3f(t->vertices[j].x, t->vertices[j].y, t->vertices[j].z);
 			glVertex3f(t->vertices[j].x, t->vertices[j].y + 0.1f, t->vertices[j].z);
 			glVertex3f(t->vertices[i].x, t->vertices[i].y + 0.1f, t->vertices[i].z);
+			
+			/* draw the backside of the border so that it is shown from all angles */
+			glVertex3f(t->vertices[i].x, t->vertices[i].y, t->vertices[i].z);
+			glVertex3f(t->vertices[i].x, t->vertices[i].y + 0.1f, t->vertices[i].z);
+			glVertex3f(t->vertices[j].x, t->vertices[j].y + 0.1f, t->vertices[j].z);
+			glVertex3f(t->vertices[j].x, t->vertices[j].y, t->vertices[j].z);
 		}
 	}
 	glEnd();
