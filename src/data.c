@@ -29,6 +29,7 @@
 #define INVALIDTEEDEFINITION "Invalid tee definition"
 #define INVALIDCUPDEFINITION "Invalid cup definition"
 #define INVALIDPARDEFINITION "Invalid par definition"
+#define INVALIDNAMEDEFINITION "Invalid name definition"
 #define READTOKENINT(tok, dest, err) { \
 	tok = strtok(NULL, FILETOKEN); \
 	ERRORIFNULL(tok, err); \
@@ -38,6 +39,29 @@
 	tok = strtok(NULL, FILETOKEN); \
 	ERRORIFNULL(tok, err); \
 	dest = (float) atof(tok); \
+}
+#define READTOKENSTR(tok, dest, err) { \
+	size_t len; \
+	char *newline, *quote, *end; \
+	char *tokcpy; \
+	tokcpy = tok + strlen(tok) + 1; /* skip over the token to get the rest of line */ \
+	ERRORIFNULL(tokcpy, err); \
+	if(tokcpy[0] == '"') { \
+		tokcpy += 1; \
+	} \
+	newline = strchr(tokcpy, '\n'); \
+	quote = strchr(tokcpy, '"'); \
+	if(quote != NULL && (newline == NULL || quote < newline)) { \
+		end = quote; /* end character is not included so this will not include quote char */ \
+	} else if(newline != NULL) { \
+		end = newline; \
+	} else { \
+		end = strchr(tokcpy, '\0'); \
+	} \
+	len = end - tokcpy; \
+	dest = (char*) calloc(1, len+1); \
+	dest[len] = '\0'; \
+	strncpy(dest, tokcpy, len); \
 }
 
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
@@ -303,6 +327,8 @@ struct hole * load_hole(char *filename) {
 				READTOKENFLOAT(tok, hole->cup->z, INVALIDCUPDEFINITION);
 			} else if(strcmp(tok, "par") == 0) {
 				READTOKENINT(tok, hole->par, INVALIDPARDEFINITION);
+			} else if(strcmp(tok, "name") == 0) {
+				READTOKENSTR(tok, hole->name, INVALIDNAMEDEFINITION);
 			} else {
 				printf("Ignoring unknown command: %s\n", tok);
 			}

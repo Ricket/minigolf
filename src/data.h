@@ -31,6 +31,7 @@ struct hole {
 	struct tee *tee;
 	struct cup *cup;
 	int par;
+	char *name;
 };
 
 struct tile {
