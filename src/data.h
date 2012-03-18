@@ -30,6 +30,7 @@ struct hole {
 	struct linkedlist *tiles;
 	struct tee *tee;
 	struct cup *cup;
+	int par;
 };
 
 struct tile {

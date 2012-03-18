@@ -28,6 +28,7 @@
 #define INVALIDTILEDEFINITION "Invalid tile definition"
 #define INVALIDTEEDEFINITION "Invalid tee definition"
 #define INVALIDCUPDEFINITION "Invalid cup definition"
+#define INVALIDPARDEFINITION "Invalid par definition"
 #define READTOKENINT(tok, dest, err) { \
 	tok = strtok(NULL, FILETOKEN); \
 	ERRORIFNULL(tok, err); \
@@ -300,6 +301,8 @@ struct hole * load_hole(char *filename) {
 				READTOKENFLOAT(tok, hole->cup->x, INVALIDCUPDEFINITION);
 				READTOKENFLOAT(tok, hole->cup->y, INVALIDCUPDEFINITION);
 				READTOKENFLOAT(tok, hole->cup->z, INVALIDCUPDEFINITION);
+			} else if(strcmp(tok, "par") == 0) {
+				READTOKENINT(tok, hole->par, INVALIDPARDEFINITION);
 			} else {
 				printf("Ignoring unknown command: %s\n", tok);
 			}
