@@ -13,7 +13,7 @@
 
 #include "linkedlist.h"
 
-#define ARROW_SPIN_SPEED 0.05f
+#define ARROW_SPIN_SPEED 0.04f
 
 struct hole;
 struct tile;
