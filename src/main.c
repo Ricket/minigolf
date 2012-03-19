@@ -171,11 +171,11 @@ static void update_logic() {
 		/* TICK */
 		if(gameState == GAMESTATE_BALLDIRECTION) {
 			/* rotate the ball's velocity slightly around the tile norm */
-			newv[0] = ball->tile->rotMat[0][0]*ball->dx + ball->tile->rotMat[1][0]*ball->dy + ball->tile->rotMat[2][0]*ball->dz;
-			newv[1] = ball->tile->rotMat[0][1]*ball->dx + ball->tile->rotMat[1][1]*ball->dy + ball->tile->rotMat[2][1]*ball->dz;
-			newv[2] = ball->tile->rotMat[0][2]*ball->dx + ball->tile->rotMat[1][2]*ball->dy + ball->tile->rotMat[2][2]*ball->dz;
+			newv[0] = ball->tile->rotMat[0][0]*ball->dx + ball->tile->rotMat[1][0]*get_ball_dy(ball) + ball->tile->rotMat[2][0]*ball->dz;
+			newv[1] = ball->tile->rotMat[0][1]*ball->dx + ball->tile->rotMat[1][1]*get_ball_dy(ball) + ball->tile->rotMat[2][1]*ball->dz;
+			newv[2] = ball->tile->rotMat[0][2]*ball->dx + ball->tile->rotMat[1][2]*get_ball_dy(ball) + ball->tile->rotMat[2][2]*ball->dz;
 			ball->dx = newv[0];
-			ball->dy = newv[1];
+			/* get_ball_dy(ball) = newv[1]; */
 			ball->dz = newv[2];
 		}
 		else if(gameState == GAMESTATE_BALLVELOCITY) {
@@ -196,14 +196,13 @@ static void update_logic() {
 			if(ball->speed < 0.0f) {
 				ball->speed = -ball->speed;
 				ball->dx = -ball->dx;
-				ball->dy = -ball->dy;
+				get_ball_dy(ball) = -get_ball_dy(ball);
 				ball->dz = -ball->dz;
 			}
 			*/
 			
 			/* move the ball, account for friction */
 			ball->x += ball->dx * ball->speed * 0.02f;
-			ball->y += ball->dy * ball->speed * 0.02f;
 			ball->z += ball->dz * ball->speed * 0.02f;
 			
 			ball->speed = max(ball->speed - FRICTION, 0.0f);
@@ -225,28 +224,26 @@ static void update_logic() {
 			/* check if ball is sinking into cup */
 			if(ball->tile == hole->cup->tile) {
 				/* distance squared */
-				dist = (ball->x - hole->cup->x)*(ball->x - hole->cup->x) + (ball->y - hole->cup->y)*(ball->y - hole->cup->y) + (ball->z - hole->cup->z)*(ball->z - hole->cup->z);
+				dist = (ball->x - hole->cup->x)*(ball->x - hole->cup->x) + (get_ball_py(ball) - hole->cup->y)*(get_ball_py(ball) - hole->cup->y) + (ball->z - hole->cup->z)*(ball->z - hole->cup->z);
 				if(dist <= CUP_VICINITY * CUP_VICINITY) {
 					if(ball->speed - CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist) < 0) {
 						printf("Winner!\n");
 						ball->speed = 0.0f;
 						ball->x = hole->cup->x;
-						ball->y = hole->cup->y;
 						ball->z = hole->cup->z;
 					} else {
-						dotprod = (ball->dx * (hole->cup->x - ball->x)) + (ball->dy * (hole->cup->y - ball->y)) + (ball->dz * (hole->cup->z - ball->z));
+						dotprod = (ball->dx * (hole->cup->x - ball->x)) + (get_ball_dy(ball) * (hole->cup->y - get_ball_py(ball))) + (ball->dz * (hole->cup->z - ball->z));
 						if(dotprod <= 0.0f) {
 							/* ball is heading away from cup */
 							/*printf("Heading away at speed %f\n", ball->speed);
 							printf("CUP_FALLIN value = %f\n", CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist)); */
 							/* set its direction directly away from cup */
 							dx = -(hole->cup->x - ball->x);
-							dy = -(hole->cup->y - ball->y);
+							dy = -(hole->cup->y - get_ball_py(ball));
 							dz = -(hole->cup->z - ball->z);
 							mag = sqrt(dx * dx + dy * dy + dz * dz);
 							if(mag > 0.002f) {
 								ball->dx = dx/mag;
-								ball->dy = dy/mag;
 								ball->dz = dz/mag;
 							}
 						}

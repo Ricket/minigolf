@@ -86,7 +86,7 @@ float get_distance_sq_to_edge(struct ball *ball, int edge) {
 	p0 = &(ball->tile->vertices[edge]);
 	p1 = &(ball->tile->vertices[(edge+1) % ball->tile->num_edges]);
 	
-	return get_shortest_distance_sq(p0, p1, ball->x, ball->y, ball->z);
+	return get_shortest_distance_sq(p0, p1, ball->x, get_ball_py(ball), ball->z);
 }
 
 int get_closest_edge(struct ball *ball) {
@@ -115,7 +115,7 @@ void bounce_ball(struct ball *ball, int edge) {
 	p1 = &(ball->tile->vertices[(edge+1) % ball->tile->num_edges]);
 	
 	x = ball->x;
-	y = ball->y;
+	y = get_ball_py(ball);
 	z = ball->z;
 	
 	x -= p0->x;
@@ -131,16 +131,14 @@ void bounce_ball(struct ball *ball, int edge) {
 	z += p0->z;
 	
 	ball->x = x;
-	ball->y = y;
 	ball->z = z;
 	
 	/* now the velocity */
-	x = ball->tile->edgeRotMat[edge][0]*ball->dx + ball->tile->edgeRotMat[edge][1]*ball->dy + ball->tile->edgeRotMat[edge][2]*ball->dz;
-	y = ball->tile->edgeRotMat[edge][3]*ball->dx + ball->tile->edgeRotMat[edge][4]*ball->dy + ball->tile->edgeRotMat[edge][5]*ball->dz;
-	z = ball->tile->edgeRotMat[edge][6]*ball->dx + ball->tile->edgeRotMat[edge][7]*ball->dy + ball->tile->edgeRotMat[edge][8]*ball->dz;
+	x = ball->tile->edgeRotMat[edge][0]*ball->dx + ball->tile->edgeRotMat[edge][1]*get_ball_dy(ball) + ball->tile->edgeRotMat[edge][2]*ball->dz;
+	y = ball->tile->edgeRotMat[edge][3]*ball->dx + ball->tile->edgeRotMat[edge][4]*get_ball_dy(ball) + ball->tile->edgeRotMat[edge][5]*ball->dz;
+	z = ball->tile->edgeRotMat[edge][6]*ball->dx + ball->tile->edgeRotMat[edge][7]*get_ball_dy(ball) + ball->tile->edgeRotMat[edge][8]*ball->dz;
 	
 	ball->dx = x;
-	ball->dy = y;
 	ball->dz = z;
 }
 
@@ -179,7 +177,7 @@ void transfer_ball(struct ball *ball, int edge) {
 	sinTheta = sin(theta);
 	
 	x = ball->x;
-	y = ball->y;
+	y = get_ball_py(ball);
 	z = ball->z;
 	
 	x -= p0->x;
@@ -196,15 +194,13 @@ void transfer_ball(struct ball *ball, int edge) {
 	z2 += p0->z;
 	
 	ball->x = x2;
-	ball->y = y2;
 	ball->z = z2;
 	
 	/* now rotate the direction by the same amount */
 	x = ball->dx;
-	y = ball->dy;
+	y = get_ball_dy(ball);
 	z = ball->dz;
 	ball->dx = (cosTheta + u[0]*u[0]*(1-cosTheta)) * x + (u[0]*u[1]*(1-cosTheta) - u[2]*sinTheta) * y + (u[0]*u[2]*(1-cosTheta)+u[1]*sinTheta) * z;
-	ball->dy = (u[1]*u[0]*(1-cosTheta) + u[2]*sinTheta) * x + (cosTheta + u[1]*u[1]*(1-cosTheta)) * y + (u[1]*u[2]*(1-cosTheta) - u[0]*sinTheta) * z;
 	ball->dz = (u[2]*u[0]*(1-cosTheta) - u[1]*sinTheta) * x + (u[2]*u[1]*(1-cosTheta) + u[0]*sinTheta) * y + (cosTheta + u[2]*u[2]*(1-cosTheta)) * z;
 	
 	/* and update the tile */
