@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>documents</key>
+	<array>
+		<dict>
+			<key>filename</key>
+			<string>src/data.c</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>src/data.h</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>src/linkedlist.c</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>src/linkedlist.h</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>src/main.c</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>src/objects.c</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>src/objects.h</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>src/physics.c</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>src/physics.h</string>
+		</dict>
+	</array>
+	<key>fileHierarchyDrawerWidth</key>
+	<integer>135</integer>
+	<key>metaData</key>
+	<dict/>
+	<key>showFileHierarchyDrawer</key>
+	<true/>
+	<key>windowFrame</key>
+	<string>{{369, 300}, {1020, 746}}</string>
+</dict>
+</plist>
