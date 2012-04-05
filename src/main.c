@@ -45,6 +45,9 @@ static int init(void);
 static void update_logic(void);
 static void reshape(int, int);
 static void render(void);
+static void myGlutBitmapString(void*, char*);
+static void push2D();
+static void pop2D();
 static void mouseclick(int, int, int, int);
 static void mousemove(int, int);
 static void mousedownmove(int, int);
@@ -324,7 +327,36 @@ static void render() {
 		draw_arrow();
 	}
 
+	push2D();
+	glRasterPos2i(0, 0);
+	glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+	myGlutBitmapString(GLUT_BITMAP_HELVETICA_18, "text to render");
+	pop2D();
+
     glutSwapBuffers();
+}
+
+static void myGlutBitmapString(void *font, char *str) {
+	int i;
+	for(i=0; str[i] != '\0'; i++) {
+		glutBitmapCharacter(font, str[i]);
+	}
+}
+
+static void push2D() {
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+}
+
+static void pop2D() {
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
 }
 
 static void setup_camera() {
