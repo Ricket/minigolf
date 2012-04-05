@@ -1,4 +1,4 @@
-CSC 462 Assignment 2: Ball Physics
+CSC 462 Assignment 4: External Objects
 Richard Carter
 2012/02/19
 
