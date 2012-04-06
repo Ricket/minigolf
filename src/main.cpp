@@ -173,6 +173,7 @@ static void update_logic() {
 	int closestEdge;
 	float dist, dotprod, mag;
 	float dx, dy, dz;
+
 	pendingDelta += currentTime - lastUpdate;
 	
 	lastUpdate = currentTime;
@@ -287,6 +288,7 @@ static void update_logic() {
 	}
 	
 	if(shouldRender) {
+		glutSetWindow(windowId);
 		glutPostRedisplay();
 	}
 }
@@ -345,7 +347,6 @@ static void render() {
 
 	push2D();
 	if(timeOnHole < 3000) {
-		printf("timeOnHole: %d\n", (int)timeOnHole);
 		if(timeOnHole < 2000) {
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		} else {
@@ -516,6 +517,7 @@ static void mousedownmove(int x, int y) {
 
 	lastx = x; lasty = y;
 	
+	glutSetWindow(windowId);
 	glutPostRedisplay();
 }
 
@@ -532,6 +534,7 @@ static void keypress(unsigned char key, int x, int y) {
 		cameraPosY -= 1.0f;
 	}
 	
+	glutSetWindow(windowId);
 	glutPostRedisplay();
 }
 
@@ -547,6 +550,7 @@ static void keypress_special(int key, int x, int y) {
 		cameraPosZ -= 1.0f;
 	}
 	
+	glutSetWindow(windowId);
 	glutPostRedisplay();
 }
 
