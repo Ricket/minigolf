@@ -104,8 +104,14 @@ static int putts;
 static struct ball *ball;
 static enum gamestate gameState = GAMESTATE_BALLDIRECTION;
 
+static float cameraDist = 7.0f;
+static float cameraRotMatrix[16];
+static float cameraPosX = 0.0f, cameraPosY = 0.0f, cameraPosZ = 0.0f;
+static void setup_camera(void);
+static void render_tile(struct tile *t);
+
 int main(int argc, char** argv) {
-	int i;
+	int i,j;
 
 	glutInit(&argc, argv);
 	
@@ -137,8 +143,21 @@ int main(int argc, char** argv) {
 	GLUI_Master.set_glutIdleFunc(&update_logic);
 	glui = GLUI_Master.create_glui_subwindow(windowId, GLUI_SUBWINDOW_RIGHT);
 
+	/* new game and quit buttons */
 	glui->add_button("New game...", GLUI_NEW_GAME, &gluiQuick);
 	glui->add_button("Quit", GLUI_QUIT, &gluiQuick);
+
+	/* camera rotation control */
+	for(i=0; i<4; i++) {
+    	for(j=0; j<4; j++) {
+    		if(i==j) {
+    			cameraRotMatrix[i*4+j] = 1.0f;
+    		} else {
+    			cameraRotMatrix[i*4+j] = 0.0f;
+    		}
+    	}
+    }
+    glui->add_rotation("Rotation", cameraRotMatrix);
 	
 	glui->set_main_gfx_window(windowId);
 	glutDisplayFunc(&render);
@@ -372,11 +391,6 @@ static void reshape(int w, int h) {
 	glMatrixMode(GL_MODELVIEW);
 }
 
-static float cameraRotX = 0.0f, cameraRotY = 0.0f, cameraDist = 7.0f;
-static float cameraPosX = 0.0f, cameraPosY = 0.0f, cameraPosZ = 0.0f;
-static void setup_camera(void);
-static void render_tile(struct tile *t);
-
 static void render() {
 	struct listnode *node;
 	
@@ -482,15 +496,20 @@ static void pop2D() {
 }
 
 static void setup_camera() {
-	float y,z;
+	/*float y,z;*/
 	
 	/* assume already in GL_MODELVIEW */
 	glLoadIdentity();
+	glTranslatef(0.0f, 0.0f, -cameraDist);
+	glMultMatrixf(cameraRotMatrix);
+	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+	/*
 	z = sin(cameraRotY*PI/180.0f) * cameraDist;
 	if(z == 0.0f) z = 0.0001f;
 	y = cos(cameraRotY*PI/180.0f) * cameraDist;
 	gluLookAt(0, y, -z, 0, 0, 0, 0, 1, 0);
 	glRotatef(cameraRotX, 0, 1, 0);
+	*/
 	glTranslatef(cameraPosX, cameraPosY, cameraPosZ);
 }
 
@@ -599,13 +618,13 @@ static void rightmousedownmove(int x, int y) {
 	}
 	
 	if((x-lastx) != 0) {
-		cameraRotX += (x-lastx) * MOUSE_SPEED_X;
+		/* cameraRotX += (x-lastx) * MOUSE_SPEED_X; */
 		/* glRotatef((float)(x-lastx), 0,1,0); */
 	}
 	if((y-lasty) != 0) {
-		cameraRotY += (y-lasty) * MOUSE_SPEED_Y;
+		/* cameraRotY += (y-lasty) * MOUSE_SPEED_Y;
 		if(cameraRotY > 70.0f) cameraRotY = 69.99f;
-		else if(cameraRotY < 10.0f) cameraRotY = 10.01f;
+		else if(cameraRotY < 10.0f) cameraRotY = 10.01f; */
 		/* glRotatef((float)(y-lasty), 1,0,0); */
 	}
 
