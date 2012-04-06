@@ -53,7 +53,7 @@ static void push2D();
 static void pop2D();
 static void mouseclick(int, int, int, int);
 static void mousemove(int, int);
-static void mousedownmove(int, int);
+static void rightmousedownmove(int, int);
 static void keypress(unsigned char, int, int);
 static void keypress_special(int, int, int);
 static void gluiQuick(int);
@@ -143,7 +143,6 @@ int main(int argc, char** argv) {
 	glutDisplayFunc(&render);
 	GLUI_Master.set_glutReshapeFunc(&reshape);
 	GLUI_Master.set_glutMouseFunc(&mouseclick);
-	glutMotionFunc(&mousedownmove);
 	glutPassiveMotionFunc(&mousemove);
 	GLUI_Master.set_glutKeyboardFunc(&keypress);
 	GLUI_Master.set_glutSpecialFunc(&keypress_special);
@@ -213,6 +212,7 @@ static void reload_course() {
 			ball = make_ball(hole->tee);
 			initialize_cuptee(hole);
 			putts = 0;
+			gameState = GAMESTATE_BALLDIRECTION;
 		}
 	}
 }
@@ -455,12 +455,11 @@ static void push2D() {
 	glLoadIdentity();
 	
 	glDisable(GL_LIGHTING);
-	/*
 	glDisable(GL_LIGHT0);
 	glDisable(GL_COLOR_MATERIAL);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	*/
+	glDisable(GL_TEXTURE_2D);
 }
 
 static void pop2D() {
@@ -469,10 +468,8 @@ static void pop2D() {
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
 	glEnable(GL_LIGHTING);
-	/*
 	glEnable(GL_LIGHT0);
 	glEnable(GL_COLOR_MATERIAL);
-	*/
 }
 
 static void setup_camera() {
@@ -569,9 +566,14 @@ static void render_tile(struct tile *t) {
 }
 
 static void mouseclick(int button, int state, int x, int y) {
-	if(state == GLUT_DOWN && button == GLUT_LEFT_BUTTON) {
-		if(gameState != GAMESTATE_BALLMOVING) {
-			gameState = static_cast<gamestate>((gameState + 1) % 3);
+	if(state == GLUT_DOWN) {
+		if(button == GLUT_LEFT_BUTTON) {
+			glutMotionFunc(NULL);
+			if(gameState != GAMESTATE_BALLMOVING) {
+				gameState = static_cast<gamestate>((gameState + 1) % 3);
+			}
+		} else if(button == GLUT_RIGHT_BUTTON) {
+			glutMotionFunc(&rightmousedownmove);
 		}
 	}
 }
@@ -582,7 +584,7 @@ static void mousemove(int x, int y) {
 	lastx = x; lasty = y;
 }
 
-static void mousedownmove(int x, int y) {
+static void rightmousedownmove(int x, int y) {
 	if(lastx == INT_MIN && lasty == INT_MIN) {
 		lastx = x; lasty = y;
 	}
