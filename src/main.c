@@ -78,6 +78,8 @@ enum gamestate {
 
 static struct course *course;
 static struct hole *hole;
+static float timeOnHole;
+static int putts;
 static struct ball *ball;
 static enum gamestate gameState = 0;
 
@@ -92,7 +94,9 @@ int main(int argc, char** argv) {
 	course = load_course(argv[1]);
 	/* print_hole(hole); */
 	hole = (struct hole *)course->holes[0].first->ptr;
+	timeOnHole = 0;
 	ball = make_ball(hole->tee);
+	putts = 0;
 	
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	/* glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT); */
@@ -234,6 +238,10 @@ static void update_logic() {
 				if(dist <= CUP_VICINITY * CUP_VICINITY) {
 					if(ball->speed - CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist) < 0) {
 						printf("Winner!\n");
+						/* TODO increment hole */
+						timeOnHole = 0;
+						putts = 0;
+
 						ball->speed = 0.0f;
 						ball->x = hole->cup->x;
 						ball->y = hole->cup->y;
@@ -263,12 +271,14 @@ static void update_logic() {
 			if(ball->speed == 0.0f) {
 				ball->speed = 0;
 				gameState = GAMESTATE_BALLDIRECTION;
+				putts++;
 				/* printf("ball closest to edge %d\n", get_closest_edge(ball)); */
 				reset_ball(ball, NULL);
 			}
 		}
 		/* /TICK */
 		
+		timeOnHole += 16;
 		pendingDelta -= 16;
 	}
 	
@@ -330,9 +340,17 @@ static void render() {
 	}
 
 	push2D();
-	glRasterPos2i(0, 0);
-	glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
-	myGlutBitmapString(GLUT_BITMAP_HELVETICA_18, "text to render");
+	if(timeOnHole < 3000) {
+		printf("timeOnHole: %d\n", (int)timeOnHole);
+		if(timeOnHole < 2000) {
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		} else {
+			/* fade out smoothly over 1 second */
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f - ((timeOnHole-2000.0f) / 1000.0f));
+		}
+		glRasterPos2i(0, 0);
+		myGlutBitmapString(GLUT_BITMAP_HELVETICA_18, hole->name);
+	}
 	pop2D();
 
     glutSwapBuffers();
@@ -352,6 +370,11 @@ static void push2D() {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
+	glDisable(GL_LIGHTING);
+	glDisable(GL_LIGHT0);
+	glDisable(GL_COLOR_MATERIAL);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 static void pop2D() {
@@ -359,6 +382,9 @@ static void pop2D() {
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_COLOR_MATERIAL);
 }
 
 static void setup_camera() {

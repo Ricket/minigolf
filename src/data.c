@@ -237,6 +237,9 @@ struct course * load_course(char *filename) {
 				course->holes = (struct linkedlist*) calloc(1, sizeof(struct linkedlist));
 
 				hole = (struct hole *) calloc(1, sizeof(struct hole));
+				hole->name = (char*) calloc(1, strlen(filename)+1);
+				strcpy(hole->name, filename);
+				hole->name[strlen(filename)] = '\0';
 				hole->tiles = (struct linkedlist *) calloc(1, sizeof(struct linkedlist));
 
 				ll_push_back(course->holes, hole);
