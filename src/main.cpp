@@ -33,6 +33,7 @@
 #include "objects.h"
 #include "physics.h"
 #include "player.h"
+#include "scorecard.h"
 
 #ifndef max
 	#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
@@ -92,6 +93,7 @@ static struct player *players[4];
 static int currentPlayer;
 static GLUI_StaticText *gluiCurrentPlayer;
 static GLUI_StaticText *gluiPar;
+static GLUI *gluiScorecard;
 static char parText[9];
 
 #define GLUI_NEW_GAME 12345
@@ -180,6 +182,8 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Failed to load resources\n");
         return 1;
     }
+
+    gluiScorecard = NULL;
 
     initialize_object_textures();
     reload_course();
@@ -300,6 +304,10 @@ static void next_player() {
 	gluiCurrentPlayer->set_text(players[currentPlayer]->name);
 }
 
+static void show_scorecard() {
+	gluiScorecard = create_scorecard(hole->par, players, &gluiQuick);
+}
+
 static void next_hole() {
 	if(hole_node->next != NULL) {
 		hole_node = hole_node->next;
@@ -396,12 +404,12 @@ static void update_logic() {
 					dist = (ball->x - hole->cup->x)*(ball->x - hole->cup->x) + (ball->y - hole->cup->y)*(ball->y - hole->cup->y) + (ball->z - hole->cup->z)*(ball->z - hole->cup->z);
 					if(dist <= CUP_VICINITY * CUP_VICINITY) {
 						if(ball->speed - CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist) < 0) {
-							printf("Winner!\n");
+							/* Winner! */
 							players[currentPlayer]->done = 1;
 							gameState = GAMESTATE_BALLDIRECTION;
 							
 							if(all_players_done()) {
-								next_hole();
+								show_scorecard();
 							} else {
 								next_player();
 							}
@@ -471,7 +479,7 @@ static void render() {
 		push2D();
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		glRasterPos2f(-1.0f, 0.9f);
-		myGlutBitmapString(GLUT_BITMAP_HELVETICA_18, "Click new game!");
+		myGlutBitmapString(GLUT_BITMAP_HELVETICA_18, "Click new game ->");
 		pop2D();
 	} else if(hole == NULL) {
 		// End of game
@@ -480,6 +488,8 @@ static void render() {
 		glRasterPos2f(-1.0f, 0.0f);
 		myGlutBitmapString(GLUT_BITMAP_HELVETICA_18, "Game over!");
 		pop2D();
+	} else if(gluiScorecard != NULL) {
+		/* blank screen; wait for user to close scorecard */
 	} else {
 		// During game
 		
@@ -744,6 +754,12 @@ static void keypress_special(int key, int x, int y) {
 static void gluiQuick(int code) {
 	int i;
 
+	if(gluiScorecard != NULL && code == GLUI_NEW_GAME) {
+		/* do not allow the user to click the new game button if
+		   they are viewing the scorecard */
+		return;
+	}
+
 	if(code == GLUI_NEW_GAME && gluiNewGame == NULL) {
 		/* create the window */
 		gluiNewGame = GLUI_Master.create_glui("New Game");
@@ -788,6 +804,12 @@ static void gluiQuick(int code) {
 		}
 
 		reload_course();
+
+	} else if(code == SCORECARD_OK) {
+		gluiScorecard->close();
+		gluiScorecard = NULL;
+
+		next_hole();
 
 	} else if(code == GLUI_QUIT) {
 		exit(0);

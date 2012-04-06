@@ -3,6 +3,10 @@
 
 #include <GL/glui.h>
 
-GLUI *create_scorecard(struct player**);
+struct player;
+
+#define SCORECARD_OK 192939
+
+GLUI *create_scorecard(int, struct player**, GLUI_CB);
 
 #endif
