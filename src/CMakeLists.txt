@@ -9,6 +9,7 @@ SET(Minigolf_SOURCE_FILES
 	linkedlist.cpp
 	objects.cpp
 	physics.cpp
+	scorecard.cpp
 	)
 
 ADD_EXECUTABLE(Minigolf ${Minigolf_SOURCE_FILES})
