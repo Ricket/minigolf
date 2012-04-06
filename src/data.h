@@ -22,6 +22,7 @@
 		return NULL; \
 	} \
 }
+#define INVALIDCOURSEDEFINITION "Invalid course definition"
 #define INVALIDTILEDEFINITION "Invalid tile definition"
 #define INVALIDTEEDEFINITION "Invalid tee definition"
 #define INVALIDCUPDEFINITION "Invalid cup definition"
@@ -61,14 +62,16 @@
 		/* put the null terminator back */ \
 		tok[origlen] = '\0'; \
 		/* if there is no space then just end */ \
-		if(end < tok+origlen) { \
-			end = tok+origlen; \
+		if(end != NULL) { \
+			if(end < tok+origlen) { \
+				end = tok+origlen; \
+			} \
+			/* eat future segments to prepare for the next strtok */ \
+			while(tok != NULL && tok < end) { \
+				tok = strtok(NULL, FILETOKEN); \
+			} \
+			/* TODO can probably call strtok with '"' as parameter */ \
 		} \
-		/* eat future segments to prepare for the next strtok */ \
-		while(tok != NULL && tok < end) { \
-			tok = strtok(NULL, FILETOKEN); \
-		} \
-		/* TODO can probably call strtok with '"' as parameter */ \
 	} else { \
 		/* read one word */ \
 		len = strlen(tok); \
@@ -86,7 +89,7 @@ struct tile_neighbor;
 struct tee;
 struct cup;
 
-struct hole * load_hole(char *filename);
+struct course * load_course(char *filename);
 void print_hole(struct hole *h);
 
 struct course {

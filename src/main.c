@@ -76,6 +76,7 @@ enum gamestate {
 	GAMESTATE_BALLMOVING
 };
 
+static struct course *course;
 static struct hole *hole;
 static struct ball *ball;
 static enum gamestate gameState = 0;
@@ -88,8 +89,9 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 	
-	hole = load_hole(argv[1]);
+	course = load_course(argv[1]);
 	/* print_hole(hole); */
+	hole = (struct hole *)course->holes[0].first->ptr;
 	ball = make_ball(hole->tee);
 	
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);

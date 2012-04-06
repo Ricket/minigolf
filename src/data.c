@@ -204,30 +204,83 @@ static void find_tile_pointers(struct hole *hole) {
 	hole->cup->tile = get_tile_by_id(hole->cup->tile_id, hole->tiles);
 }
 
-struct hole * load_hole(char *filename) {
+struct course * load_course(char *filename) {
 	FILE *fr;
 	char buffer[5001];
 	char *tok;
+	struct course *course;
 	struct hole *hole;
 	struct tile *tile;
 	int i;
 
 	buffer[5000] = 0; // it should always end in a null char
-	
+	course = NULL;
+	hole = NULL;
+
 	fr = fopen(filename, "r");
 	if(fr == NULL) {
 		printf("Error opening file\n");
 		return NULL;
 	} else {
-		hole = (struct hole *) calloc(1, sizeof(struct hole));
-		hole->tiles = (struct linkedlist *) calloc(1, sizeof(struct linkedlist));
-		
 		while(fgets(buffer, 5000, fr) != NULL) {
 			// each line of the file...
 			
 			tok = strtok(buffer, FILETOKEN);
+
+			/* first line */
+			if(course == NULL && strcmp(tok, "course") != 0) {
+				course = (struct course *) calloc(1, sizeof(struct course));
+				course->name = (char*) calloc(1, strlen(filename)+1);
+				strcpy(course->name, filename);
+				course->name[strlen(filename)] = '\0';
+				course->num_holes = 1;
+				course->holes = (struct linkedlist*) calloc(1, sizeof(struct linkedlist));
+
+				hole = (struct hole *) calloc(1, sizeof(struct hole));
+				hole->tiles = (struct linkedlist *) calloc(1, sizeof(struct linkedlist));
+
+				ll_push_back(course->holes, hole);
+			}
 			
-			if(strcmp(tok, "tile") == 0) {
+			if(strcmp(tok, "course") == 0) {
+				if(course != NULL) {
+					printf("Course not on first line or multiple courses\n");
+					return NULL;
+				}
+
+				course = (struct course *) calloc(1, sizeof(struct course));
+
+				READTOKENSTR(tok, course->name, INVALIDCOURSEDEFINITION);
+				READTOKENINT(tok, course->num_holes, INVALIDCOURSEDEFINITION);
+
+				course->holes = (struct linkedlist*) calloc(1, sizeof(struct linkedlist));
+			} else if(strcmp(tok, "begin_hole") == 0) {
+				if(course == NULL) {
+					printf("Invalid begin_hole\n");
+					return NULL;
+				}
+
+				hole = (struct hole *) calloc(1, sizeof(struct hole));
+				hole->tiles = (struct linkedlist *) calloc(1, sizeof(struct linkedlist));
+
+				ll_push_back(course->holes, hole);
+			} else if(strcmp(tok, "end_hole") == 0) {
+				if(course == NULL || hole == NULL) {
+					printf("Invalid end_hole\n");
+					return NULL;
+				}
+
+				/* postprocessing */
+				fix_height(hole);
+				find_tile_pointers(hole);
+
+				hole = NULL;
+			} else if(strcmp(tok, "tile") == 0) {
+				if(hole == NULL) {
+					printf("Invalid tile command - no hole\n");
+					return NULL;
+				}
+
 				tile = (struct tile *) calloc(1, sizeof(struct tile));
 				
 				READTOKENINT(tok, tile->id, INVALIDTILEDEFINITION);
@@ -256,7 +309,10 @@ struct hole * load_hole(char *filename) {
 				ll_push_back(hole->tiles, tile);
 				tile = NULL;
 			} else if(strcmp(tok, "tee") == 0) {
-				if(hole->tee != NULL) {
+				if(hole == NULL) {
+					printf("Invalid tee command - no hole\n");
+					return NULL;
+				} else if(hole->tee != NULL) {
 					printf("Warning: more than one tee definition; replacing previous one\n");
 					free(hole->tee);
 				}
@@ -268,7 +324,10 @@ struct hole * load_hole(char *filename) {
 				READTOKENFLOAT(tok, hole->tee->y, INVALIDTEEDEFINITION);
 				READTOKENFLOAT(tok, hole->tee->z, INVALIDTEEDEFINITION);
 			} else if(strcmp(tok, "cup") == 0) {
-				if(hole->cup != NULL) {
+				if(hole == NULL) {
+					printf("Invalid cup command - no hole\n");
+					return NULL;
+				} else if(hole->cup != NULL) {
 					printf("Warning: more than one cup definition; replacing previous one\n");
 					free(hole->cup);
 				}
@@ -280,8 +339,18 @@ struct hole * load_hole(char *filename) {
 				READTOKENFLOAT(tok, hole->cup->y, INVALIDCUPDEFINITION);
 				READTOKENFLOAT(tok, hole->cup->z, INVALIDCUPDEFINITION);
 			} else if(strcmp(tok, "par") == 0) {
+				if(hole == NULL) {
+					printf("Invalid par command - no hole\n");
+					return NULL;
+				}
+
 				READTOKENINT(tok, hole->par, INVALIDPARDEFINITION);
 			} else if(strcmp(tok, "name") == 0) {
+				if(hole == NULL) {
+					printf("Invalid name command - no hole\n");
+					return NULL;
+				}
+
 				READTOKENSTR(tok, hole->name, INVALIDNAMEDEFINITION);
 			} else {
 				printf("Ignoring unknown command: %s\n", tok);
@@ -294,11 +363,14 @@ struct hole * load_hole(char *filename) {
 		}
 		fclose(fr);
 		
-		/* postprocessing */
-		fix_height(hole);
-		find_tile_pointers(hole);
-		
-		return hole;
+		if(hole != NULL) {
+			/* postprocessing */
+			fix_height(hole);
+			find_tile_pointers(hole);
+			hole = NULL;
+		}
+
+		return course;
 	}
 }
 

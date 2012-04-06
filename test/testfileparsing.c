@@ -20,30 +20,15 @@ static void* dotest_fileparsing() {
 
 	buffer = (char*)calloc(1,100);
 
-	strcpy(buffer, "command \"zero string\" 3 \"one string\" 45 twostring threestring \"four str ing\" 7 \"fivestring\"\n");
+	strcpy(buffer, "course \"NCSU-Express\" 18\n");
 
-	printf("about to strtok\n");
 	tok = strtok(buffer, FILETOKEN);
-	printf("%s should be command\n", tok);
+	printf("%s should be course\n", tok);
 
 	READTOKENSTR(tok, str, INVALIDNAMEDEFINITION);
-	printf("%s should be zero string\n", str);
+	printf("%s should be NCSU-Express\n", str);
 	READTOKENINT(tok, num, INVALIDTILEDEFINITION);
-	printf("%d should be 3\n", num);
-	READTOKENSTR(tok, str, INVALIDNAMEDEFINITION);
-	printf("%s should be one string\n", str);
-	READTOKENINT(tok, num, INVALIDTILEDEFINITION);
-	printf("%d should be 45\n", num);
-	READTOKENSTR(tok, str, INVALIDNAMEDEFINITION);
-	printf("%s should be twostring\n", str);
-	READTOKENSTR(tok, str, INVALIDNAMEDEFINITION);
-	printf("%s should be threestring\n", str);
-	READTOKENSTR(tok, str, INVALIDNAMEDEFINITION);
-	printf("%s should be four str ing\n", str);
-	READTOKENINT(tok, num, INVALIDTILEDEFINITION);
-	printf("%d should be 7\n", num);
-	READTOKENSTR(tok, str, INVALIDNAMEDEFINITION);
-	printf("%s should be fivestring\n", str);
+	printf("%d should be 18\n", num);
 
 	return NULL;
 }
