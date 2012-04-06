@@ -15,6 +15,54 @@
 
 #define ARROW_SPIN_SPEED 0.04f
 
+#define FILETOKEN " \n"
+#define ERRORIFNULL(s,err) { \
+	if(!(s)) { \
+		printf(err "\n"); \
+		return NULL; \
+	} \
+}
+#define INVALIDTILEDEFINITION "Invalid tile definition"
+#define INVALIDTEEDEFINITION "Invalid tee definition"
+#define INVALIDCUPDEFINITION "Invalid cup definition"
+#define INVALIDPARDEFINITION "Invalid par definition"
+#define INVALIDNAMEDEFINITION "Invalid name definition"
+#define READTOKENINT(tok, dest, err) { \
+	tok = strtok(NULL, FILETOKEN); \
+	ERRORIFNULL(tok, err); \
+	dest = atoi(tok); \
+}
+#define READTOKENFLOAT(tok, dest, err) { \
+	tok = strtok(NULL, FILETOKEN); \
+	ERRORIFNULL(tok, err); \
+	dest = (float) atof(tok); \
+}
+#define READTOKENSTR(tok, dest, err) { \
+	size_t len; \
+	char *newline, *quote, *end; \
+	char *tokcpy; \
+	tokcpy = tok + strlen(tok) + 1; /* skip over the token to get the rest of line */ \
+	/* tokcpy points to the first character of the next token, i.e. one past the null */ \
+	ERRORIFNULL(tokcpy, err); \
+	if(tokcpy[0] == '"') { \
+		tokcpy += 1; \
+	} \
+	newline = strchr(tokcpy, '\n'); \
+	quote = strchr(tokcpy, '"'); \
+	if(quote != NULL && (newline == NULL || quote < newline)) { \
+		end = quote; /* end character is not included so this will not include quote char */ \
+	} else if(newline != NULL) { \
+		end = newline; \
+	} else { \
+		end = strchr(tokcpy, '\0'); \
+	} \
+	len = end - tokcpy; \
+	dest = (char*) calloc(1, len+1); \
+	dest[len] = '\0'; \
+	strncpy(dest, tokcpy, len); \
+	tok = tokcpy;\
+}
+
 struct course;
 struct hole;
 struct tile;

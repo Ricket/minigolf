@@ -7,6 +7,7 @@ SET(MinigolfTest_SOURCE_FILES
 	testmain.c
 	testlinkedlist.c
 	testphysics.c
+	testfileparsing.c
 	
 	../src/linkedlist.c
 	../src/physics.c

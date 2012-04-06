@@ -14,6 +14,7 @@
 
 #include "testlinkedlist.h"
 #include "testphysics.h"
+#include "testfileparsing.h"
 #include <stdio.h>
 
 int main(int argc, char** argv) {
@@ -23,6 +24,10 @@ int main(int argc, char** argv) {
 	
 	printf("== PHYSICS ==\n");
 	test_physics();
+	printf("\n");
+
+	printf("== FILE PARSING ==\n");
+	test_fileparsing();
 	printf("\n");
 	
 	return 0;
