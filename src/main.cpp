@@ -32,6 +32,7 @@
 #include "data.h"
 #include "objects.h"
 #include "physics.h"
+#include "player.h"
 
 #ifndef max
 	#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
@@ -48,7 +49,7 @@ static void reload_course(void);
 static void update_logic(void);
 static void reshape(int, int);
 static void render(void);
-static void myGlutBitmapString(void*, char*);
+static void myGlutBitmapString(void*, const char*);
 static void push2D();
 static void pop2D();
 static void mouseclick(int, int, int, int);
@@ -87,11 +88,7 @@ static int newPlayerEnabled[4];
 static char *newPlayerNames[4];
 
 static char *filename;
-static int playerEnabled[4];
-static char *playerNames[4];
-static int playerDone[4];
-static int playerScore[4];
-static struct ball *playerBall[4];
+static struct player *players[4];
 static int currentPlayer;
 static GLUI_StaticText *gluiCurrentPlayer;
 static GLUI_StaticText *gluiPar;
@@ -126,15 +123,14 @@ int main(int argc, char** argv) {
 
 	gluiNewGame = NULL;
 
-	playerEnabled[0] = 1;
-	for(i=1; i<4; i++) {
-		playerEnabled[i] = 0;
-	}
 	for(i=0; i<4; i++) {
-		playerNames[i] = (char*)calloc(1, sizeof(GLUI_String));
+		players[i] = (struct player *)calloc(1, sizeof(struct player));
+		players[i]->name = (char*)calloc(1, sizeof(GLUI_String));
+
 		newPlayerNames[i] = NULL;
 	}
-	strcpy(playerNames[0], "Player 1");
+	players[0]->enabled = 1;
+	strcpy(players[0]->name, "Player 1");
 
 	filename = (char*)calloc(1, sizeof(GLUI_String));
 	if(argc >= 2) {
@@ -167,7 +163,7 @@ int main(int argc, char** argv) {
     glui->add_separator();
 
     glui->add_statictext("Current player:");
-    gluiCurrentPlayer = glui->add_statictext(playerNames[0]);
+    gluiCurrentPlayer = glui->add_statictext(players[0]->name);
     glui->add_separator();
 
     parText[0] = '\0';
@@ -236,16 +232,16 @@ static void reset_hole() {
 
 	timeOnHole = 0;
 	for(i=0; i<4; i++) {
-		playerBall[i] = make_ball(hole->tee);
+		players[i]->ball = make_ball(hole->tee);
 	}
 	initialize_cuptee(hole);
 	gameState = GAMESTATE_BALLDIRECTION;
 	currentPlayer = 0;
 	for(i=0; i<4; i++) {
-		playerDone[i] = 0;
-		playerScore[i] = 0;
+		players[i]->done = 0;
+		players[i]->score = 0;
 	}
-	gluiCurrentPlayer->set_text(playerNames[0]);
+	gluiCurrentPlayer->set_text(players[0]->name);
 
 	if(hole->par > 0 && hole->par <= 999) {
 		sprintf(parText, "Par %d", hole->par);
@@ -290,7 +286,7 @@ static float arrowLengthV = ARROW_LENGTH_SPEED;
 static int all_players_done() {
 	int i;
 	for(i=0; i<4; i++) {
-		if(playerEnabled[i] && !playerDone[i]) {
+		if(players[i]->enabled && !players[i]->done) {
 			return 0;
 		}
 	}
@@ -300,8 +296,8 @@ static int all_players_done() {
 static void next_player() {
 	do {
 		currentPlayer = (currentPlayer+1) % 4;
-	} while(!playerEnabled[currentPlayer] || playerDone[currentPlayer]);
-	gluiCurrentPlayer->set_text(playerNames[currentPlayer]);
+	} while(!players[currentPlayer]->enabled || players[currentPlayer]->done);
+	gluiCurrentPlayer->set_text(players[currentPlayer]->name);
 }
 
 static void next_hole() {
@@ -340,7 +336,7 @@ static void update_logic() {
 	while(pendingDelta > 16) {
 		/* TICK */
 		if(course != NULL && hole != NULL) {
-			ball = playerBall[currentPlayer];
+			ball = players[currentPlayer]->ball;
 			if(gameState == GAMESTATE_BALLDIRECTION) {
 				/* rotate the ball's velocity slightly around the tile norm */
 				newv[0] = ball->tile->rotMat[0][0]*ball->dx + ball->tile->rotMat[1][0]*ball->dy + ball->tile->rotMat[2][0]*ball->dz;
@@ -401,7 +397,7 @@ static void update_logic() {
 					if(dist <= CUP_VICINITY * CUP_VICINITY) {
 						if(ball->speed - CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist) < 0) {
 							printf("Winner!\n");
-							playerDone[currentPlayer] = 1;
+							players[currentPlayer]->done = 1;
 							gameState = GAMESTATE_BALLDIRECTION;
 							
 							if(all_players_done()) {
@@ -502,18 +498,18 @@ static void render() {
 		/* find ball tile and draw ball */
 		node = hole->tiles->first;
 		while(node != NULL) {
-			if(((struct tile *)node->ptr)->id == playerBall[currentPlayer]->tile_id) {
+			if(((struct tile *)node->ptr)->id == players[currentPlayer]->ball->tile_id) {
 				break;
 			}
 			node = node->next;
 		}
 		if(node != NULL) {
-			update_ball(playerBall[currentPlayer], (struct tile *)node->ptr);
+			update_ball(players[currentPlayer]->ball, (struct tile *)node->ptr);
 		} else {
 			printf("Warning: ball tile not found\n");
 		}
 		
-		draw_ball(playerBall[currentPlayer]);
+		draw_ball(players[currentPlayer]->ball);
 		
 		if(gameState == GAMESTATE_BALLDIRECTION || gameState == GAMESTATE_BALLVELOCITY) {
 			draw_arrow();
@@ -536,7 +532,7 @@ static void render() {
     glutSwapBuffers();
 }
 
-static void myGlutBitmapString(void *font, char *str) {
+static void myGlutBitmapString(void *font, const char *str) {
 	int i;
 	for(i=0; str[i] != '\0'; i++) {
 		glutBitmapCharacter(font, str[i]);
@@ -675,7 +671,7 @@ static void mouseclick(int button, int state, int x, int y) {
 				gameState = static_cast<gamestate>((gameState + 1) % 3);
 
 				if(gameState == GAMESTATE_BALLMOVING) {
-					playerScore[currentPlayer]++;
+					players[currentPlayer]->score++;
 				}
 			}
 		} else if(button == GLUT_RIGHT_BUTTON) {
@@ -758,9 +754,9 @@ static void gluiQuick(int code) {
 		gluiNewGame->add_edittext("Input file:", GLUI_EDITTEXT_TEXT, newFilename);
 
 		for(i=0; i<4; i++) {
-			newPlayerEnabled[i] = playerEnabled[i];
+			newPlayerEnabled[i] = players[i]->enabled;
 			newPlayerNames[i] = (char*)calloc(1, sizeof(GLUI_String));
-			strncpy(newPlayerNames[i], playerNames[i], sizeof(GLUI_String));
+			strncpy(newPlayerNames[i], players[i]->name, sizeof(GLUI_String));
 		}
 
 		/* add the controls to the new game window */
@@ -784,11 +780,11 @@ static void gluiQuick(int code) {
 		}
 
 		for(i=0; i<4; i++) {
-			strcpy(playerNames[i], newPlayerNames[i]);
+			strcpy(players[i]->name, newPlayerNames[i]);
 		}
 
 		for(i=0; i<4; i++) {
-			playerEnabled[i] = newPlayerEnabled[i];
+			players[i]->enabled = newPlayerEnabled[i];
 		}
 
 		reload_course();
