@@ -44,6 +44,7 @@
 
 int main(int argc, char** argv);
 static int init(void);
+static void reload_course(void);
 static void update_logic(void);
 static void reshape(int, int);
 static void render(void);
@@ -82,8 +83,12 @@ enum gamestate {
 static int windowId;
 static GLUI *glui, *gluiNewGame;
 static char *newFilename;
+static int newPlayerEnabled[4];
+static char *newPlayerNames[4];
 
 static char *filename;
+static int playerEnabled[4];
+static char *playerNames[4];
 
 #define GLUI_NEW_GAME 12345
 #define GLUI_NEW_GAME_OK 3332
@@ -99,24 +104,30 @@ static struct ball *ball;
 static enum gamestate gameState = GAMESTATE_BALLDIRECTION;
 
 int main(int argc, char** argv) {
+	int i;
+
 	glutInit(&argc, argv);
 	
 	if(argc < 2) {
-		printf("Syntax: %s [GLUT_args] input_filename\n", argv[0]);
-		return 0;
+		printf("Optional arguments: %s [GLUT_args] [input_filename]\n", argv[0]);
 	}
-	
-	course = load_course(argv[1]);
-	/* print_hole(hole); */
-	hole = (struct hole *)course->holes[0].first->ptr;
-	timeOnHole = 0;
-	ball = make_ball(hole->tee);
-	putts = 0;
 
 	gluiNewGame = NULL;
 
+	playerEnabled[0] = 1;
+	for(i=1; i<4; i++) {
+		playerEnabled[i] = 0;
+	}
+	for(i=0; i<4; i++) {
+		playerNames[i] = (char*)calloc(1, sizeof(GLUI_String));
+		newPlayerNames[i] = NULL;
+	}
+	strcpy(playerNames[0], "Player 1");
+
 	filename = (char*)calloc(1, sizeof(GLUI_String));
-	strncpy(filename, argv[1], max(sizeof(GLUI_String), strlen(argv[1])));
+	if(argc >= 2) {
+		strncpy(filename, argv[1], max(sizeof(GLUI_String), strlen(argv[1])));
+	}
 	newFilename = NULL;
 	
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
@@ -140,7 +151,9 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Failed to load resources\n");
         return 1;
     }
-	initialize_cuptee(hole);
+
+    initialize_object_textures();
+    reload_course();
 
     glutMainLoop();
 	
@@ -185,6 +198,25 @@ static int init() {
     return 1;
 }
 
+static void reload_course() {
+	if(course != NULL) {
+		free_course(course);
+		course = NULL;
+	}
+
+	if(strlen(filename) > 0) {
+		course = load_course(filename);
+		/* print_hole(hole); */
+		if(course != NULL) {
+			hole = (struct hole *)course->holes[0].first->ptr;
+			timeOnHole = 0;
+			ball = make_ball(hole->tee);
+			initialize_cuptee(hole);
+			putts = 0;
+		}
+	}
+}
+
 static int lastUpdate = 0;
 static int pendingDelta = 0;
 static float arrowLengthV = ARROW_LENGTH_SPEED;
@@ -206,102 +238,104 @@ static void update_logic() {
 	
 	while(pendingDelta > 16) {
 		/* TICK */
-		if(gameState == GAMESTATE_BALLDIRECTION) {
-			/* rotate the ball's velocity slightly around the tile norm */
-			newv[0] = ball->tile->rotMat[0][0]*ball->dx + ball->tile->rotMat[1][0]*ball->dy + ball->tile->rotMat[2][0]*ball->dz;
-			newv[1] = ball->tile->rotMat[0][1]*ball->dx + ball->tile->rotMat[1][1]*ball->dy + ball->tile->rotMat[2][1]*ball->dz;
-			newv[2] = ball->tile->rotMat[0][2]*ball->dx + ball->tile->rotMat[1][2]*ball->dy + ball->tile->rotMat[2][2]*ball->dz;
-			ball->dx = newv[0];
-			ball->dy = newv[1];
-			ball->dz = newv[2];
-		}
-		else if(gameState == GAMESTATE_BALLVELOCITY) {
-			/* increase/loop the ball's velocity slightly */
-			ball->speed += arrowLengthV;
-			if(ball->speed > MAX_ARROW_LENGTH) {
-				ball->speed = MAX_ARROW_LENGTH - (ball->speed - MAX_ARROW_LENGTH);
-				arrowLengthV = -arrowLengthV;
-			} else if(ball->speed < MIN_ARROW_LENGTH) {
-				ball->speed = MIN_ARROW_LENGTH - (ball->speed - MIN_ARROW_LENGTH);
-				arrowLengthV = -arrowLengthV;
+		if(course != NULL && hole != NULL && ball != NULL) {
+			if(gameState == GAMESTATE_BALLDIRECTION) {
+				/* rotate the ball's velocity slightly around the tile norm */
+				newv[0] = ball->tile->rotMat[0][0]*ball->dx + ball->tile->rotMat[1][0]*ball->dy + ball->tile->rotMat[2][0]*ball->dz;
+				newv[1] = ball->tile->rotMat[0][1]*ball->dx + ball->tile->rotMat[1][1]*ball->dy + ball->tile->rotMat[2][1]*ball->dz;
+				newv[2] = ball->tile->rotMat[0][2]*ball->dx + ball->tile->rotMat[1][2]*ball->dy + ball->tile->rotMat[2][2]*ball->dz;
+				ball->dx = newv[0];
+				ball->dy = newv[1];
+				ball->dz = newv[2];
 			}
-		}
-		else if(gameState == GAMESTATE_BALLMOVING) {
-			/* apply gravity to ball->speed */
-			/*
-			ball->speed -= GRAVITY_MAGNITUDE * sqrt(ball->tile->norm_z*ball->tile->norm_z + ball->tile->norm_x*ball->tile->norm_x);
-			if(ball->speed < 0.0f) {
-				ball->speed = -ball->speed;
-				ball->dx = -ball->dx;
-				ball->dy = -ball->dy;
-				ball->dz = -ball->dz;
-			}
-			*/
-			
-			/* move the ball, account for friction */
-			ball->x += ball->dx * ball->speed * 0.02f;
-			ball->y += ball->dy * ball->speed * 0.02f;
-			ball->z += ball->dz * ball->speed * 0.02f;
-			
-			ball->speed = max(ball->speed - FRICTION, 0.0f);
-
-			/* if ball exits current tile, bounce or switch tiles */
-			while(!ball_in_tile(ball)) {
-				/* reflect or switch tiles */
-				closestEdge = get_closest_edge(ball);
-				
-				if(ball->tile->neighbors[closestEdge].id == 0) {
-					/* printf("*bounce*\n"); */
-					bounce_ball(ball, closestEdge);
-				} else {
-					/* printf("*cross into new tile*\n"); */
-					transfer_ball(ball, closestEdge);
+			else if(gameState == GAMESTATE_BALLVELOCITY) {
+				/* increase/loop the ball's velocity slightly */
+				ball->speed += arrowLengthV;
+				if(ball->speed > MAX_ARROW_LENGTH) {
+					ball->speed = MAX_ARROW_LENGTH - (ball->speed - MAX_ARROW_LENGTH);
+					arrowLengthV = -arrowLengthV;
+				} else if(ball->speed < MIN_ARROW_LENGTH) {
+					ball->speed = MIN_ARROW_LENGTH - (ball->speed - MIN_ARROW_LENGTH);
+					arrowLengthV = -arrowLengthV;
 				}
 			}
-			
-			/* check if ball is sinking into cup */
-			if(ball->tile == hole->cup->tile) {
-				/* distance squared */
-				dist = (ball->x - hole->cup->x)*(ball->x - hole->cup->x) + (ball->y - hole->cup->y)*(ball->y - hole->cup->y) + (ball->z - hole->cup->z)*(ball->z - hole->cup->z);
-				if(dist <= CUP_VICINITY * CUP_VICINITY) {
-					if(ball->speed - CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist) < 0) {
-						printf("Winner!\n");
-						/* TODO increment hole */
-						timeOnHole = 0;
-						putts = 0;
+			else if(gameState == GAMESTATE_BALLMOVING) {
+				/* apply gravity to ball->speed */
+				/*
+				ball->speed -= GRAVITY_MAGNITUDE * sqrt(ball->tile->norm_z*ball->tile->norm_z + ball->tile->norm_x*ball->tile->norm_x);
+				if(ball->speed < 0.0f) {
+					ball->speed = -ball->speed;
+					ball->dx = -ball->dx;
+					ball->dy = -ball->dy;
+					ball->dz = -ball->dz;
+				}
+				*/
+				
+				/* move the ball, account for friction */
+				ball->x += ball->dx * ball->speed * 0.02f;
+				ball->y += ball->dy * ball->speed * 0.02f;
+				ball->z += ball->dz * ball->speed * 0.02f;
+				
+				ball->speed = max(ball->speed - FRICTION, 0.0f);
 
-						ball->speed = 0.0f;
-						ball->x = hole->cup->x;
-						ball->y = hole->cup->y;
-						ball->z = hole->cup->z;
+				/* if ball exits current tile, bounce or switch tiles */
+				while(!ball_in_tile(ball)) {
+					/* reflect or switch tiles */
+					closestEdge = get_closest_edge(ball);
+					
+					if(ball->tile->neighbors[closestEdge].id == 0) {
+						/* printf("*bounce*\n"); */
+						bounce_ball(ball, closestEdge);
 					} else {
-						dotprod = (ball->dx * (hole->cup->x - ball->x)) + (ball->dy * (hole->cup->y - ball->y)) + (ball->dz * (hole->cup->z - ball->z));
-						if(dotprod <= 0.0f) {
-							/* ball is heading away from cup */
-							/*printf("Heading away at speed %f\n", ball->speed);
-							printf("CUP_FALLIN value = %f\n", CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist)); */
-							/* set its direction directly away from cup */
-							dx = -(hole->cup->x - ball->x);
-							dy = -(hole->cup->y - ball->y);
-							dz = -(hole->cup->z - ball->z);
-							mag = sqrt(dx * dx + dy * dy + dz * dz);
-							if(mag > 0.002f) {
-								ball->dx = dx/mag;
-								ball->dy = dy/mag;
-								ball->dz = dz/mag;
+						/* printf("*cross into new tile*\n"); */
+						transfer_ball(ball, closestEdge);
+					}
+				}
+				
+				/* check if ball is sinking into cup */
+				if(ball->tile == hole->cup->tile) {
+					/* distance squared */
+					dist = (ball->x - hole->cup->x)*(ball->x - hole->cup->x) + (ball->y - hole->cup->y)*(ball->y - hole->cup->y) + (ball->z - hole->cup->z)*(ball->z - hole->cup->z);
+					if(dist <= CUP_VICINITY * CUP_VICINITY) {
+						if(ball->speed - CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist) < 0) {
+							printf("Winner!\n");
+							/* TODO increment hole */
+							timeOnHole = 0;
+							putts = 0;
+
+							ball->speed = 0.0f;
+							ball->x = hole->cup->x;
+							ball->y = hole->cup->y;
+							ball->z = hole->cup->z;
+						} else {
+							dotprod = (ball->dx * (hole->cup->x - ball->x)) + (ball->dy * (hole->cup->y - ball->y)) + (ball->dz * (hole->cup->z - ball->z));
+							if(dotprod <= 0.0f) {
+								/* ball is heading away from cup */
+								/*printf("Heading away at speed %f\n", ball->speed);
+								printf("CUP_FALLIN value = %f\n", CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist)); */
+								/* set its direction directly away from cup */
+								dx = -(hole->cup->x - ball->x);
+								dy = -(hole->cup->y - ball->y);
+								dz = -(hole->cup->z - ball->z);
+								mag = sqrt(dx * dx + dy * dy + dz * dz);
+								if(mag > 0.002f) {
+									ball->dx = dx/mag;
+									ball->dy = dy/mag;
+									ball->dz = dz/mag;
+								}
 							}
 						}
 					}
 				}
-			}
-			
-			/* when ball comes to a stop, go back to direction selection */
-			if(ball->speed == 0.0f) {
-				ball->speed = 0;
-				gameState = GAMESTATE_BALLDIRECTION;
-				putts++;
-				/* printf("ball closest to edge %d\n", get_closest_edge(ball)); */
-				reset_ball(ball, NULL);
+				
+				/* when ball comes to a stop, go back to direction selection */
+				if(ball->speed == 0.0f) {
+					ball->speed = 0;
+					gameState = GAMESTATE_BALLDIRECTION;
+					putts++;
+					/* printf("ball closest to edge %d\n", get_closest_edge(ball)); */
+					reset_ball(ball, NULL);
+				}
 			}
 		}
 		/* /TICK */
@@ -339,50 +373,68 @@ static void render() {
 	
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	setup_camera();
-
-	/* draw each tile */
-	node = hole->tiles->first;
-	while(node != NULL) {
-		render_tile((struct tile *)node->ptr);
-		node = node->next;
-	}
-	
-	draw_cup(hole->cup);
-	draw_tee(hole->tee);
-	
-	/* find ball tile and draw ball */
-	node = hole->tiles->first;
-	while(node != NULL) {
-		if(((struct tile *)node->ptr)->id == ball->tile_id) {
-			break;
-		}
-		node = node->next;
-	}
-	if(node != NULL) {
-		update_ball(ball, (struct tile *)node->ptr);
+	if(course == NULL) {
+		// Before new game
+		push2D();
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		glRasterPos2f(-1.0f, 0.0f);
+		myGlutBitmapString(GLUT_BITMAP_HELVETICA_18, "Click new game!");
+		pop2D();
+	} else if(hole == NULL) {
+		// End of game
+		push2D();
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		glRasterPos2f(-1.0f, 0.0f);
+		myGlutBitmapString(GLUT_BITMAP_HELVETICA_18, "Game over!");
+		pop2D();
 	} else {
-		printf("Warning: ball tile not found\n");
-	}
-	
-	draw_ball(ball);
-	
-	if(gameState == GAMESTATE_BALLDIRECTION || gameState == GAMESTATE_BALLVELOCITY) {
-		draw_arrow();
-	}
+		// During game
+		
+		setup_camera();
 
-	push2D();
-	if(timeOnHole < 3000) {
-		if(timeOnHole < 2000) {
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		} else {
-			/* fade out smoothly over 1 second */
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f - ((timeOnHole-2000.0f) / 1000.0f));
+		/* draw each tile */
+		node = hole->tiles->first;
+		while(node != NULL) {
+			render_tile((struct tile *)node->ptr);
+			node = node->next;
 		}
-		glRasterPos2i(0, 0);
-		myGlutBitmapString(GLUT_BITMAP_HELVETICA_18, hole->name);
-	}
-	pop2D();
+		
+		draw_cup(hole->cup);
+		draw_tee(hole->tee);
+		
+		/* find ball tile and draw ball */
+		node = hole->tiles->first;
+		while(node != NULL) {
+			if(((struct tile *)node->ptr)->id == ball->tile_id) {
+				break;
+			}
+			node = node->next;
+		}
+		if(node != NULL) {
+			update_ball(ball, (struct tile *)node->ptr);
+		} else {
+			printf("Warning: ball tile not found\n");
+		}
+		
+		draw_ball(ball);
+		
+		if(gameState == GAMESTATE_BALLDIRECTION || gameState == GAMESTATE_BALLVELOCITY) {
+			draw_arrow();
+		}
+
+		push2D();
+		if(timeOnHole < 3000) {
+			if(timeOnHole < 2000) {
+				glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			} else {
+				/* fade out smoothly over 1 second */
+				glColor4f(1.0f, 1.0f, 1.0f, 1.0f - ((timeOnHole-2000.0f) / 1000.0f));
+			}
+			glRasterPos2i(0, 0);
+			myGlutBitmapString(GLUT_BITMAP_HELVETICA_18, hole->name);
+		}
+		pop2D();
+	}	
 
     glutSwapBuffers();
 }
@@ -401,11 +453,14 @@ static void push2D() {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
+	
 	glDisable(GL_LIGHTING);
+	/*
 	glDisable(GL_LIGHT0);
 	glDisable(GL_COLOR_MATERIAL);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	*/
 }
 
 static void pop2D() {
@@ -414,8 +469,10 @@ static void pop2D() {
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
 	glEnable(GL_LIGHTING);
+	/*
 	glEnable(GL_LIGHT0);
 	glEnable(GL_COLOR_MATERIAL);
+	*/
 }
 
 static void setup_camera() {
@@ -581,36 +638,66 @@ static void keypress_special(int key, int x, int y) {
 }
 
 static void gluiQuick(int code) {
+	int i;
+
 	if(code == GLUI_NEW_GAME && gluiNewGame == NULL) {
-		/* new game */
+		/* create the window */
 		gluiNewGame = GLUI_Master.create_glui("New Game");
-		/* input file */
-		if(newFilename != NULL) {
-			free(newFilename);
-		}
+
+		/* copy current values into the live variables */
 		newFilename = (char*)calloc(1, sizeof(GLUI_String));
 		strcpy(newFilename, filename);
 		gluiNewGame->add_edittext("Input file:", GLUI_EDITTEXT_TEXT, newFilename);
-		/* number of players */
-		/* name of each player */
 
+		for(i=0; i<4; i++) {
+			newPlayerEnabled[i] = playerEnabled[i];
+			newPlayerNames[i] = (char*)calloc(1, sizeof(GLUI_String));
+			strncpy(newPlayerNames[i], playerNames[i], sizeof(GLUI_String));
+		}
+
+		/* add the controls to the new game window */
+		gluiNewGame->add_checkbox("Player 1", &newPlayerEnabled[0])->disable();
+		gluiNewGame->add_edittext("Player 1 name", GLUI_EDITTEXT_TEXT, newPlayerNames[0]);
+		gluiNewGame->add_checkbox("Player 2", &newPlayerEnabled[1]);
+		gluiNewGame->add_edittext("Player 2 name", GLUI_EDITTEXT_TEXT, newPlayerNames[1]);
+		gluiNewGame->add_checkbox("Player 3", &newPlayerEnabled[2]);
+		gluiNewGame->add_edittext("Player 3 name", GLUI_EDITTEXT_TEXT, newPlayerNames[2]);
+		gluiNewGame->add_checkbox("Player 4", &newPlayerEnabled[3]);
+		gluiNewGame->add_edittext("Player 4 name", GLUI_EDITTEXT_TEXT, newPlayerNames[3]);
+
+		/* OK and cancel buttons */
 		gluiNewGame->add_button("OK", GLUI_NEW_GAME_OK, &gluiQuick);
 		gluiNewGame->add_button("Cancel", GLUI_NEW_GAME_CANCEL, &gluiQuick);
-	} else if(code == GLUI_NEW_GAME_CANCEL) {
-		free(newFilename); newFilename = NULL;
-		
-		gluiNewGame->close();
-		gluiNewGame = NULL;
+
 	} else if(code == GLUI_NEW_GAME_OK) {
+		/* user clicked OK; copy new values into vals */
 		if(strlen(newFilename) > 0) {
 			strcpy(filename, newFilename);
 		}
-		free(newFilename); newFilename = NULL;
 
-		gluiNewGame->close();
-		gluiNewGame = NULL;
+		for(i=0; i<4; i++) {
+			strcpy(playerNames[i], newPlayerNames[i]);
+		}
+
+		for(i=0; i<4; i++) {
+			playerEnabled[i] = newPlayerEnabled[i];
+		}
+
+		reload_course();
+
 	} else if(code == GLUI_QUIT) {
 		exit(0);
+	}
+
+	/* if user hit OK or Cancel, free memory */
+	if(code == GLUI_NEW_GAME_CANCEL || code == GLUI_NEW_GAME_OK) {
+		gluiNewGame->close();
+		gluiNewGame = NULL;
+
+		free(newFilename); newFilename = NULL;
+		for(i=0; i<4; i++) {
+			free(newPlayerNames[i]); newPlayerNames[i] = NULL;
+		}
 	}
 }
 

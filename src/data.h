@@ -90,6 +90,7 @@ struct tee;
 struct cup;
 
 struct course * load_course(char *filename);
+void free_course(struct course *);
 void print_hole(struct hole *h);
 
 struct course {

@@ -377,6 +377,17 @@ struct course * load_course(char *filename) {
 	}
 }
 
+void free_course(struct course *course) {
+	if(course == NULL) {
+		printf("Warning: free_course called with null course");
+		return;
+	}
+
+	// TODO free holes, etc.
+
+	free(course);
+}
+
 /* printing */
 void print_tile(struct tile *t);
 void print_tile_vertex(struct tile_vertex *v);

@@ -144,12 +144,13 @@ void initialize_quads(struct hole *hole) {
 	}
 }
 
-void initialize_textures() {
+void initialize_object_textures() {
 	int i,j;
 	int cupsize_over_2 = (CIRCLE_TEXTURE_SIZE/2);
 	int cupsize_over_2_squared = cupsize_over_2*cupsize_over_2;
 	unsigned int *imgData;
 
+	glEnable(GL_TEXTURE_2D);
 	glGenTextures(NUM_TEXTURES, textures);
 	
 	/* TEXTURE_CIRCLE */
@@ -208,7 +209,6 @@ void initialize_textures() {
 void initialize_cuptee(struct hole *hole) {
 	/* this method must be called after creating the OpenGL window */
 	initialize_quads(hole);
-	initialize_textures();
 }
 
 void draw_cup(struct cup *c) {
