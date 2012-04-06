@@ -89,6 +89,13 @@ static char *newPlayerNames[4];
 static char *filename;
 static int playerEnabled[4];
 static char *playerNames[4];
+static int playerDone[4];
+static int playerScore[4];
+static struct ball *playerBall[4];
+static int currentPlayer;
+static GLUI_StaticText *gluiCurrentPlayer;
+static GLUI_StaticText *gluiPar;
+static char parText[9];
 
 #define GLUI_NEW_GAME 12345
 #define GLUI_NEW_GAME_OK 3332
@@ -100,8 +107,6 @@ static struct course *course;
 static struct hole *hole;
 static struct listnode *hole_node;
 static float timeOnHole;
-static int putts;
-static struct ball *ball;
 static enum gamestate gameState = GAMESTATE_BALLDIRECTION;
 
 static float cameraDist = 7.0f;
@@ -146,6 +151,7 @@ int main(int argc, char** argv) {
 	/* new game and quit buttons */
 	glui->add_button("New game...", GLUI_NEW_GAME, &gluiQuick);
 	glui->add_button("Quit", GLUI_QUIT, &gluiQuick);
+	glui->add_separator();
 
 	/* camera rotation control */
 	for(i=0; i<4; i++) {
@@ -158,6 +164,14 @@ int main(int argc, char** argv) {
     	}
     }
     glui->add_rotation("Rotation", cameraRotMatrix);
+    glui->add_separator();
+
+    glui->add_statictext("Current player:");
+    gluiCurrentPlayer = glui->add_statictext(playerNames[0]);
+    glui->add_separator();
+
+    parText[0] = '\0';
+    gluiPar = glui->add_statictext(parText);
 	
 	glui->set_main_gfx_window(windowId);
 	glutDisplayFunc(&render);
@@ -218,11 +232,31 @@ static int init() {
 }
 
 static void reset_hole() {
+	int i;
+
 	timeOnHole = 0;
-	ball = make_ball(hole->tee);
+	for(i=0; i<4; i++) {
+		playerBall[i] = make_ball(hole->tee);
+	}
 	initialize_cuptee(hole);
-	putts = 0;
 	gameState = GAMESTATE_BALLDIRECTION;
+	currentPlayer = 0;
+	for(i=0; i<4; i++) {
+		playerDone[i] = 0;
+		playerScore[i] = 0;
+	}
+	gluiCurrentPlayer->set_text(playerNames[0]);
+
+	if(hole->par > 0 && hole->par <= 999) {
+		sprintf(parText, "Par %d", hole->par);
+	} else if(hole->par <= 0) {
+		strcpy(parText, "Par ???");
+	} else {
+		strcpy(parText, "Par lots");
+	}
+	parText[8] = '\0';
+	gluiPar->set_text(parText);
+
 }
 
 static void reload_course() {
@@ -241,11 +275,50 @@ static void reload_course() {
 			reset_hole();
 		}
 	}
+
+	if(course == NULL) {
+		gluiCurrentPlayer->set_text("none");
+		parText[0] = '\0';
+		gluiPar->set_text(parText);
+	}
 }
 
 static int lastUpdate = 0;
 static int pendingDelta = 0;
 static float arrowLengthV = ARROW_LENGTH_SPEED;
+
+static int all_players_done() {
+	int i;
+	for(i=0; i<4; i++) {
+		if(playerEnabled[i] && !playerDone[i]) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+static void next_player() {
+	do {
+		currentPlayer = (currentPlayer+1) % 4;
+	} while(!playerEnabled[currentPlayer] || playerDone[currentPlayer]);
+	gluiCurrentPlayer->set_text(playerNames[currentPlayer]);
+}
+
+static void next_hole() {
+	if(hole_node->next != NULL) {
+		hole_node = hole_node->next;
+		hole = (struct hole *)hole_node->ptr;
+		reset_hole();
+	} else {
+		hole = NULL;
+		/*
+		ball->speed = 0.0f;
+		ball->x = hole->cup->x;
+		ball->y = hole->cup->y;
+		ball->z = hole->cup->z;
+		*/
+	}
+}
 
 static void update_logic() {
 	int currentTime = glutGet(GLUT_ELAPSED_TIME);
@@ -254,6 +327,8 @@ static void update_logic() {
 	int closestEdge;
 	float dist, dotprod, mag;
 	float dx, dy, dz;
+
+	struct ball *ball;
 
 	pendingDelta += currentTime - lastUpdate;
 	
@@ -264,7 +339,8 @@ static void update_logic() {
 	
 	while(pendingDelta > 16) {
 		/* TICK */
-		if(course != NULL && hole != NULL && ball != NULL) {
+		if(course != NULL && hole != NULL) {
+			ball = playerBall[currentPlayer];
 			if(gameState == GAMESTATE_BALLDIRECTION) {
 				/* rotate the ball's velocity slightly around the tile norm */
 				newv[0] = ball->tile->rotMat[0][0]*ball->dx + ball->tile->rotMat[1][0]*ball->dy + ball->tile->rotMat[2][0]*ball->dz;
@@ -325,15 +401,13 @@ static void update_logic() {
 					if(dist <= CUP_VICINITY * CUP_VICINITY) {
 						if(ball->speed - CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist) < 0) {
 							printf("Winner!\n");
-							if(hole_node->next != NULL) {
-								hole_node = hole_node->next;
-								hole = (struct hole *)hole_node->ptr;
-								reset_hole();
+							playerDone[currentPlayer] = 1;
+							gameState = GAMESTATE_BALLDIRECTION;
+							
+							if(all_players_done()) {
+								next_hole();
 							} else {
-								ball->speed = 0.0f;
-								ball->x = hole->cup->x;
-								ball->y = hole->cup->y;
-								ball->z = hole->cup->z;
+								next_player();
 							}
 						} else {
 							dotprod = (ball->dx * (hole->cup->x - ball->x)) + (ball->dy * (hole->cup->y - ball->y)) + (ball->dz * (hole->cup->z - ball->z));
@@ -358,11 +432,11 @@ static void update_logic() {
 				
 				/* when ball comes to a stop, go back to direction selection */
 				if(ball->speed == 0.0f) {
-					ball->speed = 0;
-					gameState = GAMESTATE_BALLDIRECTION;
-					putts++;
-					/* printf("ball closest to edge %d\n", get_closest_edge(ball)); */
 					reset_ball(ball, NULL);
+					gameState = GAMESTATE_BALLDIRECTION;
+					next_player();
+
+					/* printf("ball closest to edge %d\n", get_closest_edge(ball)); */
 				}
 			}
 		}
@@ -400,7 +474,7 @@ static void render() {
 		// Before new game
 		push2D();
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		glRasterPos2f(-1.0f, 0.0f);
+		glRasterPos2f(-1.0f, 0.9f);
 		myGlutBitmapString(GLUT_BITMAP_HELVETICA_18, "Click new game!");
 		pop2D();
 	} else if(hole == NULL) {
@@ -428,18 +502,18 @@ static void render() {
 		/* find ball tile and draw ball */
 		node = hole->tiles->first;
 		while(node != NULL) {
-			if(((struct tile *)node->ptr)->id == ball->tile_id) {
+			if(((struct tile *)node->ptr)->id == playerBall[currentPlayer]->tile_id) {
 				break;
 			}
 			node = node->next;
 		}
 		if(node != NULL) {
-			update_ball(ball, (struct tile *)node->ptr);
+			update_ball(playerBall[currentPlayer], (struct tile *)node->ptr);
 		} else {
 			printf("Warning: ball tile not found\n");
 		}
 		
-		draw_ball(ball);
+		draw_ball(playerBall[currentPlayer]);
 		
 		if(gameState == GAMESTATE_BALLDIRECTION || gameState == GAMESTATE_BALLVELOCITY) {
 			draw_arrow();
@@ -599,6 +673,10 @@ static void mouseclick(int button, int state, int x, int y) {
 			glutMotionFunc(NULL);
 			if(gameState != GAMESTATE_BALLMOVING) {
 				gameState = static_cast<gamestate>((gameState + 1) % 3);
+
+				if(gameState == GAMESTATE_BALLMOVING) {
+					playerScore[currentPlayer]++;
+				}
 			}
 		} else if(button == GLUT_RIGHT_BUTTON) {
 			glutMotionFunc(&rightmousedownmove);
