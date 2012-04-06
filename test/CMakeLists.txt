@@ -4,14 +4,14 @@ PROJECT(Minigolf)
 INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR} ${GLU_INCLUDE_DIR} ${GLUT_INCLUDE_DIR})
 
 SET(MinigolfTest_SOURCE_FILES 
-	testmain.c
-	testlinkedlist.c
-	testphysics.c
-	testfileparsing.c
+	testmain.cpp
+	testlinkedlist.cpp
+	testphysics.cpp
+	testfileparsing.cpp
 	
-	../src/linkedlist.c
-	../src/physics.c
-	../src/objects.c
+	../src/linkedlist.cpp
+	../src/physics.cpp
+	../src/objects.cpp
 	)
 	
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/test ${PROJECT_SOURCE_DIR}/src)
