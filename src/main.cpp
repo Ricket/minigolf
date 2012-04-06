@@ -98,6 +98,7 @@ static char *playerNames[4];
 
 static struct course *course;
 static struct hole *hole;
+static struct listnode *hole_node;
 static float timeOnHole;
 static int putts;
 static struct ball *ball;
@@ -197,6 +198,14 @@ static int init() {
     return 1;
 }
 
+static void reset_hole() {
+	timeOnHole = 0;
+	ball = make_ball(hole->tee);
+	initialize_cuptee(hole);
+	putts = 0;
+	gameState = GAMESTATE_BALLDIRECTION;
+}
+
 static void reload_course() {
 	if(course != NULL) {
 		free_course(course);
@@ -207,12 +216,10 @@ static void reload_course() {
 		course = load_course(filename);
 		/* print_hole(hole); */
 		if(course != NULL) {
-			hole = (struct hole *)course->holes[0].first->ptr;
-			timeOnHole = 0;
-			ball = make_ball(hole->tee);
-			initialize_cuptee(hole);
-			putts = 0;
-			gameState = GAMESTATE_BALLDIRECTION;
+			hole_node = (*(course->holes)).first;
+			hole = (struct hole *) hole_node->ptr;
+
+			reset_hole();
 		}
 	}
 }
@@ -299,14 +306,16 @@ static void update_logic() {
 					if(dist <= CUP_VICINITY * CUP_VICINITY) {
 						if(ball->speed - CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist) < 0) {
 							printf("Winner!\n");
-							/* TODO increment hole */
-							timeOnHole = 0;
-							putts = 0;
-
-							ball->speed = 0.0f;
-							ball->x = hole->cup->x;
-							ball->y = hole->cup->y;
-							ball->z = hole->cup->z;
+							if(hole_node->next != NULL) {
+								hole_node = hole_node->next;
+								hole = (struct hole *)hole_node->ptr;
+								reset_hole();
+							} else {
+								ball->speed = 0.0f;
+								ball->x = hole->cup->x;
+								ball->y = hole->cup->y;
+								ball->z = hole->cup->z;
+							}
 						} else {
 							dotprod = (ball->dx * (hole->cup->x - ball->x)) + (ball->dy * (hole->cup->y - ball->y)) + (ball->dz * (hole->cup->z - ball->z));
 							if(dotprod <= 0.0f) {
