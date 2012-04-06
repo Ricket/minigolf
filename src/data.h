@@ -38,29 +38,44 @@
 	dest = (float) atof(tok); \
 }
 #define READTOKENSTR(tok, dest, err) { \
-	size_t len; \
-	char *newline, *quote, *end; \
-	char *tokcpy; \
-	tokcpy = tok + strlen(tok) + 1; /* skip over the token to get the rest of line */ \
-	/* tokcpy points to the first character of the next token, i.e. one past the null */ \
-	ERRORIFNULL(tokcpy, err); \
-	if(tokcpy[0] == '"') { \
-		tokcpy += 1; \
-	} \
-	newline = strchr(tokcpy, '\n'); \
-	quote = strchr(tokcpy, '"'); \
-	if(quote != NULL && (newline == NULL || quote < newline)) { \
-		end = quote; /* end character is not included so this will not include quote char */ \
-	} else if(newline != NULL) { \
-		end = newline; \
+	char *end; \
+	int len, origlen; \
+	\
+	tok = strtok(NULL, FILETOKEN); \
+	ERRORIFNULL(tok, err); \
+	if(tok[0] == '"') { \
+		/* change the null terminator back to a space */ \
+		origlen = strlen(tok); \
+		tok[origlen] = ' '; \
+		/* read up to the close quote */ \
+		end = strchr(tok+1, '"'); /* tok is quote so search after start quote */ \
+		len = end - tok + 1; /* calculate the strlen including quotes */ \
+		dest = (char*)calloc(1, len+1-2); /* add 1 to len for a null char, sub 2 for quotes */ \
+		dest[len-2] = '\0'; /* put that null char in the dest */ \
+		strncpy(dest, tok+1, len-2); \
+		/* put a null character over the end quote to prepare for strrchr */ \
+		tok[len-1] = '\0'; \
+		end = strrchr(tok, ' '); /* find the last space before quote */ \
+		/* now put the end quote back */ \
+		tok[len-1] = '"'; \
+		/* put the null terminator back */ \
+		tok[origlen] = '\0'; \
+		/* if there is no space then just end */ \
+		if(end < tok+origlen) { \
+			end = tok+origlen; \
+		} \
+		/* eat future segments to prepare for the next strtok */ \
+		while(tok != NULL && tok < end) { \
+			tok = strtok(NULL, FILETOKEN); \
+		} \
+		/* TODO can probably call strtok with '"' as parameter */ \
 	} else { \
-		end = strchr(tokcpy, '\0'); \
+		/* read one word */ \
+		len = strlen(tok); \
+		dest = (char*)calloc(1, len+1);\
+		strncpy(dest, tok, len); \
+		dest[len] = '\0'; \
 	} \
-	len = end - tokcpy; \
-	dest = (char*) calloc(1, len+1); \
-	dest[len] = '\0'; \
-	strncpy(dest, tokcpy, len); \
-	tok = tokcpy;\
 }
 
 struct course;
