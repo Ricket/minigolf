@@ -15,6 +15,7 @@
 
 #define ARROW_SPIN_SPEED 0.04f
 
+struct course;
 struct hole;
 struct tile;
 struct tile_vertex;
@@ -25,6 +26,11 @@ struct cup;
 struct hole * load_hole(char *filename);
 void print_hole(struct hole *h);
 
+struct course {
+	char *name;
+	int num_holes;
+	struct linkedlist *holes;
+};
 
 struct hole {
 	struct linkedlist *tiles;
