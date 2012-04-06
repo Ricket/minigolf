@@ -12,6 +12,8 @@
 #  pragma warning( disable : 4100 )
 #endif
 
+#include <GL/glui.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #define bool int
@@ -76,12 +78,14 @@ enum gamestate {
 	GAMESTATE_BALLMOVING
 };
 
+static int windowId;
+
 static struct course *course;
 static struct hole *hole;
 static float timeOnHole;
 static int putts;
 static struct ball *ball;
-static enum gamestate gameState = 0;
+static enum gamestate gameState = GAMESTATE_BALLDIRECTION;
 
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
@@ -100,8 +104,8 @@ int main(int argc, char** argv) {
 	
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	/* glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT); */
-	glutCreateWindow("Minigolf by Richard Carter");
-	glutIdleFunc(&update_logic);
+	windowId = glutCreateWindow("Minigolf by Richard Carter");
+	GLUI_Master.set_glutIdleFunc(&update_logic);
 	glutDisplayFunc(&render);
 	glutReshapeFunc(&reshape);
 	glutMouseFunc(&mouseclick);
@@ -483,7 +487,7 @@ static void render_tile(struct tile *t) {
 static void mouseclick(int button, int state, int x, int y) {
 	if(state == GLUT_DOWN && button == GLUT_LEFT_BUTTON) {
 		if(gameState != GAMESTATE_BALLMOVING) {
-			gameState = (gameState + 1) % 3;
+			gameState = static_cast<gamestate>((gameState + 1) % 3);
 		}
 	}
 }
