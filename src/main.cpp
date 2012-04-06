@@ -55,6 +55,7 @@ static void mousemove(int, int);
 static void mousedownmove(int, int);
 static void keypress(unsigned char, int, int);
 static void keypress_special(int, int, int);
+static void gluiQuick(int);
 
 #define WINDOW_WIDTH 400
 #define WINDOW_HEIGHT 300
@@ -79,6 +80,16 @@ enum gamestate {
 };
 
 static int windowId;
+static GLUI *glui, *gluiNewGame;
+static char *newFilename;
+
+static char *filename;
+
+#define GLUI_NEW_GAME 12345
+#define GLUI_NEW_GAME_OK 3332
+#define GLUI_NEW_GAME_CANCEL 3333
+#define GLUI_QUIT 17734
+#define GLUI_INPUTFILE 234
 
 static struct course *course;
 static struct hole *hole;
@@ -101,18 +112,30 @@ int main(int argc, char** argv) {
 	timeOnHole = 0;
 	ball = make_ball(hole->tee);
 	putts = 0;
+
+	gluiNewGame = NULL;
+
+	filename = (char*)calloc(1, sizeof(GLUI_String));
+	strncpy(filename, argv[1], max(sizeof(GLUI_String), strlen(argv[1])));
+	newFilename = NULL;
 	
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	/* glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT); */
 	windowId = glutCreateWindow("Minigolf by Richard Carter");
 	GLUI_Master.set_glutIdleFunc(&update_logic);
+	glui = GLUI_Master.create_glui_subwindow(windowId, GLUI_SUBWINDOW_RIGHT);
+
+	glui->add_button("New game...", GLUI_NEW_GAME, &gluiQuick);
+	glui->add_button("Quit", GLUI_QUIT, &gluiQuick);
+	
+	glui->set_main_gfx_window(windowId);
 	glutDisplayFunc(&render);
-	glutReshapeFunc(&reshape);
-	glutMouseFunc(&mouseclick);
+	GLUI_Master.set_glutReshapeFunc(&reshape);
+	GLUI_Master.set_glutMouseFunc(&mouseclick);
 	glutMotionFunc(&mousedownmove);
 	glutPassiveMotionFunc(&mousemove);
-	glutKeyboardFunc(&keypress);
-	glutSpecialFunc(&keypress_special);
+	GLUI_Master.set_glutKeyboardFunc(&keypress);
+	GLUI_Master.set_glutSpecialFunc(&keypress_special);
 	if (!init()) {
         fprintf(stderr, "Failed to load resources\n");
         return 1;
@@ -294,11 +317,14 @@ static void update_logic() {
 }
 
 static void reshape(int w, int h) {
-	glViewport(0,0,w,h);
+	int gluix, gluiy, gluiw, gluih;
+
+	GLUI_Master.get_viewport_area(&gluix, &gluiy, &gluiw, &gluih);
+	glViewport(gluix, gluiy, gluiw, gluih);
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60, ((double)w) / ((double)h), 0.1, 1000.0);
+	gluPerspective(60, ((double)gluiw) / ((double)gluih), 0.1, 1000.0);
 	
 	glMatrixMode(GL_MODELVIEW);
 }
@@ -552,5 +578,39 @@ static void keypress_special(int key, int x, int y) {
 	
 	glutSetWindow(windowId);
 	glutPostRedisplay();
+}
+
+static void gluiQuick(int code) {
+	if(code == GLUI_NEW_GAME && gluiNewGame == NULL) {
+		/* new game */
+		gluiNewGame = GLUI_Master.create_glui("New Game");
+		/* input file */
+		if(newFilename != NULL) {
+			free(newFilename);
+		}
+		newFilename = (char*)calloc(1, sizeof(GLUI_String));
+		strcpy(newFilename, filename);
+		gluiNewGame->add_edittext("Input file:", GLUI_EDITTEXT_TEXT, newFilename);
+		/* number of players */
+		/* name of each player */
+
+		gluiNewGame->add_button("OK", GLUI_NEW_GAME_OK, &gluiQuick);
+		gluiNewGame->add_button("Cancel", GLUI_NEW_GAME_CANCEL, &gluiQuick);
+	} else if(code == GLUI_NEW_GAME_CANCEL) {
+		free(newFilename); newFilename = NULL;
+		
+		gluiNewGame->close();
+		gluiNewGame = NULL;
+	} else if(code == GLUI_NEW_GAME_OK) {
+		if(strlen(newFilename) > 0) {
+			strcpy(filename, newFilename);
+		}
+		free(newFilename); newFilename = NULL;
+
+		gluiNewGame->close();
+		gluiNewGame = NULL;
+	} else if(code == GLUI_QUIT) {
+		exit(0);
+	}
 }
 
