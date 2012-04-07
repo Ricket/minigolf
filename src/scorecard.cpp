@@ -111,7 +111,7 @@ GLUI *create_scorecard(struct scorecard *scorecard, GLUI_CB callback) {
 			score = 0;
 			for(j=0; j<scorecard->num_holes; j++) {
 				if(scorecard->scores[j * scorecard->num_players + i] > -1) {
-					score += scorecard->pars[j] - scorecard->scores[j * scorecard->num_players + i];
+					score += scorecard->scores[j * scorecard->num_players + i] - scorecard->pars[j];
 				}
 			}
 

@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <GL/glui.h>
 
+#ifndef min
+	#define min( a, b ) ( ((a) < (b)) ? (a) : (b) )
+#endif
+
 static GLUI *gluiHighscores = NULL;
 
 struct highscoreentry {
@@ -58,10 +62,10 @@ void add_highscore(struct highscoretable *table, char *player, char *course, int
 	} else {
 		insertionIdx = -1;
 		/* entry holds the new array of entries */
-		entry = (struct highscoreentry *)calloc(table->num_entries+1, sizeof(struct highscoreentry));
+		entry = (struct highscoreentry *)calloc(min(10, table->num_entries+1), sizeof(struct highscoreentry));
 
 		/* loop through the existing entries to find the spot for the new one */
-		for(i=0,j=0; i<table->num_entries; i++,j++) {
+		for(i=0,j=0; i<table->num_entries && j < 10; i++,j++) {
 			if(insertionIdx == -1) { /* insertion point not yet found */
 				if(table->entries[i].score > score) {
 					/* We found a score greater than our inserting score! Now set the
@@ -78,6 +82,7 @@ void add_highscore(struct highscoretable *table, char *player, char *course, int
 			memcpy(&(entry[j]), &(table->entries[i]), sizeof(struct highscoreentry));
 		}
 
+
 		if(insertionIdx == -1) {
 			insertionIdx = table->num_entries;
 			if(insertionIdx >= 10) {
@@ -86,6 +91,7 @@ void add_highscore(struct highscoretable *table, char *player, char *course, int
 			}
 		}
 
+		free(table->entries);
 		table->entries = entry;
 		entry = &(table->entries[insertionIdx]);
 
@@ -103,7 +109,9 @@ void add_highscore(struct highscoretable *table, char *player, char *course, int
 
 		entry->score = score;
 
-		table->num_entries++;
+		if(table->num_entries < 10) {
+			table->num_entries++;
+		}
 	}
 }
 
@@ -230,7 +238,8 @@ void show_highscores() {
 	char score[20];
 
 	if(gluiHighscores != NULL) {
-		return;
+		gluiHighscores->close();
+		gluiHighscores = NULL;
 	}
 
 	gluiHighscores = GLUI_Master.create_glui("Highscores");
@@ -248,8 +257,12 @@ void show_highscores() {
 		}
 		gluiHighscores->add_column_to_panel(panel, true);
 		for(i=0; i<highscores->num_entries; i++) {
-			sprintf(score, "%+d", highscores->entries[i].score);
-			gluiHighscores->add_statictext_to_panel(panel, score);
+			if(highscores->entries[i].score == 0) {
+				gluiHighscores->add_statictext_to_panel(panel, "E");
+			} else {
+				sprintf(score, "%+d", highscores->entries[i].score);
+				gluiHighscores->add_statictext_to_panel(panel, score);
+			}
 		}
 	} else {
 		gluiHighscores->add_statictext_to_panel(panel, "No highscores");

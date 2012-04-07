@@ -125,8 +125,6 @@ static void render_tile(struct tile *t);
 
 int main(int argc, char** argv) {
 	int i,j;
-	struct highscoretable *highscoretable;
-	char namebuf[30], coursebuf[30];
 
 	glutInit(&argc, argv);
 	
@@ -341,6 +339,9 @@ static void show_scorecard() {
 }
 
 static void next_hole() {
+	int i,j,score;
+	struct highscoretable *highscores;
+
 	if(hole_node->next != NULL) {
 		hole_node = hole_node->next;
 		hole = (struct hole *)hole_node->ptr;
@@ -348,12 +349,26 @@ static void next_hole() {
 		reset_hole();
 	} else {
 		hole = NULL;
-		/*
-		ball->speed = 0.0f;
-		ball->x = hole->cup->x;
-		ball->y = hole->cup->y;
-		ball->z = hole->cup->z;
-		*/
+
+		/* end of course; show the hiscores */
+		highscores = load_highscores();
+		if(highscores != NULL) {
+			for(i=0; i<4; i++) {
+				if(players[i]->enabled) {
+					score = 0;
+					for(j=0; j<course->num_holes; j++) {
+						if(scorecard->scores[j * 4 + i] > -1) {
+							score += scorecard->scores[j * scorecard->num_players + i] - scorecard->pars[j];
+						}
+					}
+					add_highscore(highscores, players[i]->name, course->name, score);
+				}
+			}
+			save_highscores(highscores);
+			free_highscores(highscores);
+		}
+
+		show_highscores();
 	}
 }
 
