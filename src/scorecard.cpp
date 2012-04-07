@@ -65,6 +65,7 @@ GLUI *create_scorecard(struct scorecard *scorecard, GLUI_CB callback) {
 		panel->set_alignment(GLUI_ALIGN_LEFT);
 
 		ret->add_statictext_to_panel(panel, "Hole");
+		ret->add_statictext_to_panel(panel, "Par");
 		ret->add_separator_to_panel(panel);
 		for(i=0; i<scorecard->num_players; i++) {
 			if(scorecard->playerEnabled[i]) {
@@ -75,6 +76,8 @@ GLUI *create_scorecard(struct scorecard *scorecard, GLUI_CB callback) {
 		for(i=startHole; i<=endHole; i++) {
 			ret->add_column_to_panel(panel, true);
 			sprintf(holeNum, "%d", (i+1));
+			ret->add_statictext_to_panel(panel, holeNum);
+			sprintf(holeNum, "%d", scorecard->pars[i]);
 			ret->add_statictext_to_panel(panel, holeNum);
 			ret->add_separator_to_panel(panel);
 			for(j=0; j<scorecard->num_players; j++) {

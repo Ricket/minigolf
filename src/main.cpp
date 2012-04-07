@@ -35,6 +35,7 @@
 #include "player.h"
 #include "scorecard.h"
 #include "about.h"
+#include "highscores.h"
 
 #ifndef max
 	#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
@@ -101,6 +102,7 @@ static char parText[9];
 #define GLUI_NEW_GAME 12345
 #define GLUI_NEW_GAME_OK 3332
 #define GLUI_NEW_GAME_CANCEL 3333
+#define GLUI_HIGHSCORES 848484
 #define GLUI_QUIT 17734
 #define GLUI_ABOUT 17735
 #define GLUI_INPUTFILE 234
@@ -154,9 +156,10 @@ int main(int argc, char** argv) {
 	glui = GLUI_Master.create_glui_subwindow(windowId, GLUI_SUBWINDOW_RIGHT);
 
 	/* new game and quit buttons */
-	glui->add_button("New game...", GLUI_NEW_GAME, &gluiQuick);
+	glui->add_button("New game", GLUI_NEW_GAME, &gluiQuick);
+	glui->add_button("High scores", GLUI_HIGHSCORES, &gluiQuick);
 	glui->add_button("Quit", GLUI_QUIT, &gluiQuick);
-	glui->add_button("About...", GLUI_ABOUT, &gluiQuick);
+	glui->add_button("About", GLUI_ABOUT, &gluiQuick);
 	glui->add_separator();
 
 	/* camera rotation control */
@@ -839,6 +842,8 @@ static void gluiQuick(int code) {
 		exit(0);
 	} else if(code == GLUI_ABOUT) {
 		show_about_dialog();
+	} else if(code == GLUI_HIGHSCORES) {
+		show_highscores();
 	}
 
 	/* if user hit OK or Cancel, free memory */
