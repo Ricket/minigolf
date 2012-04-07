@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#define SIZE_PLAYERNAME 50
+
 void clear_scorecard(struct scorecard *scorecard, int num_players, int num_holes) {
 	int i;
 
@@ -25,7 +27,7 @@ void clear_scorecard(struct scorecard *scorecard, int num_players, int num_holes
 	scorecard->pars = (int *)calloc(num_holes, sizeof(int));
 	scorecard->playerNames = (char**)calloc(num_players, sizeof(char*));
 	for(i=0; i<4; i++) {
-		scorecard->playerNames[i] = (char*)calloc(1, sizeof(GLUI_String));
+		scorecard->playerNames[i] = (char*)calloc(1, SIZE_PLAYERNAME);
 	}
 	scorecard->playerEnabled = (int*)calloc(num_players, sizeof(int));
 	scorecard->num_holes = num_holes;

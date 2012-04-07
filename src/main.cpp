@@ -107,6 +107,9 @@ static char parText[9];
 #define GLUI_ABOUT 17735
 #define GLUI_INPUTFILE 234
 
+#define SIZE_PLAYERNAME 50
+#define SIZE_FILENAME 100
+
 static struct course *course;
 static struct hole *hole;
 static int hole_num;
@@ -136,16 +139,16 @@ int main(int argc, char** argv) {
 
 	for(i=0; i<4; i++) {
 		players[i] = (struct player *)calloc(1, sizeof(struct player));
-		players[i]->name = (char*)calloc(1, sizeof(GLUI_String));
+		players[i]->name = (char*)calloc(1, SIZE_PLAYERNAME);
 
 		newPlayerNames[i] = NULL;
 	}
 	players[0]->enabled = 1;
 	strcpy(players[0]->name, "Player 1");
 
-	filename = (char*)calloc(1, sizeof(GLUI_String));
+	filename = (char*)calloc(1, SIZE_FILENAME);
 	if(argc >= 2) {
-		strncpy(filename, argv[1], max(sizeof(GLUI_String), strlen(argv[1])));
+		strncpy(filename, argv[1], SIZE_FILENAME);
 	}
 	newFilename = NULL;
 	
@@ -794,14 +797,14 @@ static void gluiQuick(int code) {
 		gluiNewGame = GLUI_Master.create_glui("New Game");
 
 		/* copy current values into the live variables */
-		newFilename = (char*)calloc(1, sizeof(GLUI_String));
+		newFilename = (char*)calloc(1, SIZE_FILENAME);
 		strcpy(newFilename, filename);
 		gluiNewGame->add_edittext("Input file:", GLUI_EDITTEXT_TEXT, newFilename);
 
 		for(i=0; i<4; i++) {
 			newPlayerEnabled[i] = players[i]->enabled;
-			newPlayerNames[i] = (char*)calloc(1, sizeof(GLUI_String));
-			strncpy(newPlayerNames[i], players[i]->name, sizeof(GLUI_String));
+			newPlayerNames[i] = (char*)calloc(1, SIZE_PLAYERNAME);
+			strncpy(newPlayerNames[i], players[i]->name, SIZE_PLAYERNAME);
 		}
 
 		/* add the controls to the new game window */
