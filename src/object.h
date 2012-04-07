@@ -9,6 +9,7 @@ struct polygon {
 	int num_edges;
 	float *x, *y, *z; /* arrays holding the x,y,z positions */
 	float r,g,b;
+	/* TODO NORMAL */
 };
 
 struct boundingbox {
@@ -23,5 +24,7 @@ struct object {
 	struct tile *tiles;
 	int num_tiles;
 };
+
+void render_object(struct object *);
 
 #endif

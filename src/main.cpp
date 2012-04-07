@@ -36,6 +36,7 @@
 #include "scorecard.h"
 #include "about.h"
 #include "highscores.h"
+#include "object.h"
 
 #ifndef max
 	#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
@@ -550,9 +551,17 @@ static void render() {
 			render_tile((struct tile *)node->ptr);
 			node = node->next;
 		}
+
+		/* draw each object */
+		node = hole->objects->first;
+		while(node != NULL) {
+			render_object((struct object *)node->ptr);
+			node = node->next;
+		}
 		
 		draw_cup(hole->cup);
 		draw_tee(hole->tee);
+
 		
 		/* find ball tile and draw ball */
 		node = hole->tiles->first;

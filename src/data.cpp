@@ -456,7 +456,7 @@ struct course * load_course(char *filename) {
 				printf("Ignoring unknown command: %s\n", tok);
 			}
 			
-			// use up the rest of the string
+			/* use up the rest of the string */
 			while(tok != NULL) {
 				tok = strtok(NULL, FILETOKEN);
 			}
@@ -481,7 +481,7 @@ void free_course(struct course *course) {
 		return;
 	}
 
-	// TODO free holes, etc.
+	/* TODO free holes, etc. */
 
 	free(course);
 }
