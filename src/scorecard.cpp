@@ -19,6 +19,9 @@ void clear_scorecard(struct scorecard *scorecard, int num_players, int num_holes
 	}
 
 	scorecard->scores = (int *)calloc(num_players * num_holes, sizeof(int));
+	for(i=0; i<num_players * num_holes; i++) {
+		scorecard->scores[i] = -1;
+	}
 	scorecard->pars = (int *)calloc(num_holes, sizeof(int));
 	scorecard->playerNames = (char**)calloc(num_players, sizeof(char*));
 	for(i=0; i<4; i++) {
@@ -48,7 +51,7 @@ void add_score(struct scorecard *scorecard, int hole, int player, int score) {
 GLUI *create_scorecard(struct scorecard *scorecard, GLUI_CB callback) {
 	GLUI *ret;
 	GLUI_Panel *panel;
-	int i,j,startHole,endHole;
+	int i,j,startHole,endHole,score;
 	char holeNum[14];
 
 	ret = GLUI_Master.create_glui("Scorecard");
@@ -82,10 +85,36 @@ GLUI *create_scorecard(struct scorecard *scorecard, GLUI_CB callback) {
 			ret->add_separator_to_panel(panel);
 			for(j=0; j<scorecard->num_players; j++) {
 				if(scorecard->playerEnabled[j]) {
-					sprintf(holeNum, "%d", scorecard->scores[i * scorecard->num_players + j]);
-					ret->add_statictext_to_panel(panel, holeNum);
+					if(scorecard->scores[i * scorecard->num_players + j] == -1) {
+						ret->add_statictext_to_panel(panel, "-");
+					} else {
+						sprintf(holeNum, "%d", scorecard->scores[i * scorecard->num_players + j]);
+						ret->add_statictext_to_panel(panel, holeNum);
+					}
 				}
 			}
+		}
+	}
+
+	panel = ret->add_panel("Scores");
+	for(i=0; i<scorecard->num_players; i++) {
+		if(scorecard->playerEnabled[i]) {
+			ret->add_statictext_to_panel(panel, scorecard->playerNames[i]);
+		}
+	}
+	ret->add_column_to_panel(panel, true);
+	for(i=0; i<scorecard->num_players; i++) {
+		if(scorecard->playerEnabled[i]) {
+			/* score */
+			score = 0;
+			for(j=0; j<scorecard->num_holes; j++) {
+				if(scorecard->scores[j * scorecard->num_players + i] > -1) {
+					score += scorecard->pars[j] - scorecard->scores[j * scorecard->num_players + i];
+				}
+			}
+
+			sprintf(holeNum, "%+d", score);
+			ret->add_statictext_to_panel(panel, holeNum);
 		}
 	}
 
