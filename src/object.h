@@ -12,13 +12,16 @@ struct polygon {
 };
 
 struct boundingbox {
+	int num_points;
 	float *x, *y, *z;
-	int *tile_ids;
-	struct tile *tiles;
 };
 
 struct object {
-
+	struct linkedlist *polys;
+	struct boundingbox *bbox;
+	int *tile_ids;
+	struct tile *tiles;
+	int num_tiles;
 };
 
 #endif

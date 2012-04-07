@@ -213,6 +213,9 @@ struct course * load_course(char *filename) {
 	struct hole *hole;
 	struct tile *tile;
 	struct object *object;
+	struct polygon *poly;
+	struct boundingbox *bbox;
+	int *tmpIntPtr;
 	int i;
 
 	buffer[5000] = 0; // it should always end in a null char
@@ -244,6 +247,7 @@ struct course * load_course(char *filename) {
 				strcpy(hole->name, filename);
 				hole->name[strlen(filename)] = '\0';
 				hole->tiles = (struct linkedlist *) calloc(1, sizeof(struct linkedlist));
+				hole->objects = (struct linkedlist *) calloc(1, sizeof(struct linkedlist));
 
 				ll_push_back(course->holes, hole);
 			}
@@ -268,6 +272,7 @@ struct course * load_course(char *filename) {
 
 				hole = (struct hole *) calloc(1, sizeof(struct hole));
 				hole->tiles = (struct linkedlist *) calloc(1, sizeof(struct linkedlist));
+				hole->objects = (struct linkedlist *) calloc(1, sizeof(struct linkedlist));
 
 				ll_push_back(course->holes, hole);
 			} else if(strcmp(tok, "end_hole") == 0) {
@@ -360,17 +365,93 @@ struct course * load_course(char *filename) {
 				READTOKENSTR(tok, hole->name, INVALIDNAMEDEFINITION);
 
 			} else if(strcmp(tok, "begin_object") == 0) {
-				if(hole == NULL) {
-					printf("Invalid begin_object command - no hole\n");
+				if(hole == NULL || object != NULL) {
+					printf("Invalid begin_object command\n");
 					return NULL;
 				}
 
+				object = (struct object *)calloc(1, sizeof(struct object));
+				object->polys = (struct linkedlist *)calloc(1, sizeof(struct linkedlist));
+				ll_push_back(hole->objects, object);
 
 			} else if(strcmp(tok, "end_object") == 0) {
 				if(hole == NULL || object == NULL) {
 					printf("Invalid end_object command\n");
 					return NULL;
 				}
+
+				/* do any postprocessing */
+
+				object = NULL;
+
+			} else if(strcmp(tok, "poly") == 0) {
+				if(object == NULL) {
+					printf("Invalid poly command\n");
+					return NULL;
+				}
+
+				poly = (struct polygon *)calloc(1, sizeof(struct polygon));
+				ll_push_back(object->polys, poly);
+
+				READTOKENINT(tok, poly->num_edges, INVALIDOBJECTDEFINITION);
+				poly->x = (float*)calloc(poly->num_edges, sizeof(float));
+				poly->y = (float*)calloc(poly->num_edges, sizeof(float));
+				poly->z = (float*)calloc(poly->num_edges, sizeof(float));
+
+				for(i = 0; i < poly->num_edges; i++) {
+					READTOKENFLOAT(tok, poly->x[i], INVALIDOBJECTDEFINITION);
+					READTOKENFLOAT(tok, poly->y[i], INVALIDOBJECTDEFINITION);
+					READTOKENFLOAT(tok, poly->z[i], INVALIDOBJECTDEFINITION);
+				}
+
+				READTOKENFLOAT(tok, poly->r, INVALIDOBJECTDEFINITION);
+				READTOKENFLOAT(tok, poly->g, INVALIDOBJECTDEFINITION);
+				READTOKENFLOAT(tok, poly->b, INVALIDOBJECTDEFINITION);
+
+				poly = NULL;
+
+			} else if(strcmp(tok, "bbox") == 0) {
+				if(object == NULL || object->bbox != NULL) {
+					printf("Invalid bbox command\n");
+					return NULL;
+				}
+
+				bbox = (struct boundingbox *)calloc(1, sizeof(struct boundingbox));
+				object->bbox = bbox;
+
+				READTOKENINT(tok, bbox->num_points, INVALIDOBJECTDEFINITION);
+				bbox->x = (float*)calloc(bbox->num_points, sizeof(float));
+				bbox->y = (float*)calloc(bbox->num_points, sizeof(float));
+				bbox->z = (float*)calloc(bbox->num_points, sizeof(float));
+
+				for(i = 0; i < bbox->num_points; i++) {
+					READTOKENFLOAT(tok, bbox->x[i], INVALIDOBJECTDEFINITION);
+					READTOKENFLOAT(tok, bbox->y[i], INVALIDOBJECTDEFINITION);
+					READTOKENFLOAT(tok, bbox->z[i], INVALIDOBJECTDEFINITION);
+				}
+
+				bbox = NULL;
+
+			} else if(strcmp(tok, "intersect") == 0) {
+				if(object == NULL) {
+					printf("Invalid intersect command\n");
+					return NULL;
+				}
+
+				if(object->num_tiles == 0) {
+					object->tile_ids = (int*)malloc( sizeof(int) );
+				} else {
+					tmpIntPtr = object->tile_ids;
+					object->tile_ids = (int*)malloc((object->num_tiles + 1) * sizeof(int));
+					memcpy(object->tile_ids, tmpIntPtr, sizeof(int) * object->num_tiles);
+				}
+				/* set tmpIntPtr to the last tile id, the one we want to populate */
+				tmpIntPtr = &(object->tile_ids[object->num_tiles++]);
+
+				READTOKENINT(tok, (*tmpIntPtr), INVALIDOBJECTDEFINITION);
+
+				tmpIntPtr = NULL;
+
 			} else {
 				printf("Ignoring unknown command: %s\n", tok);
 			}
@@ -386,6 +467,7 @@ struct course * load_course(char *filename) {
 			/* postprocessing */
 			fix_height(hole);
 			find_tile_pointers(hole);
+			/* TODO find_tile_pointers needs to also look at objects */
 			hole = NULL;
 		}
 

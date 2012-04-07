@@ -28,6 +28,7 @@
 #define INVALIDCUPDEFINITION "Invalid cup definition"
 #define INVALIDPARDEFINITION "Invalid par definition"
 #define INVALIDNAMEDEFINITION "Invalid name definition"
+#define INVALIDOBJECTDEFINITION "Invalid object definition"
 #define READTOKENINT(tok, dest, err) { \
 	tok = strtok(NULL, FILETOKEN); \
 	ERRORIFNULL(tok, err); \
@@ -101,6 +102,7 @@ struct course {
 
 struct hole {
 	struct linkedlist *tiles;
+	struct linkedlist *objects;
 	struct tee *tee;
 	struct cup *cup;
 	int par;
