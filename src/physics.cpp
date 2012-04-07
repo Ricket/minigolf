@@ -18,7 +18,7 @@
 #include <math.h>
 
 #include "data.h"
-#include "objects.h"
+#include "ballcuptee.h"
 
 bool ball_in_tile(struct ball *ball) {
 	float ballx, ballz;

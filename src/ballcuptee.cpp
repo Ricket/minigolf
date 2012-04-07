@@ -12,7 +12,7 @@
 #  pragma warning( disable : 4100 )
 #endif
 
-#include "objects.h"
+#include "ballcuptee.h"
 #include "data.h"
 
 #include <stdlib.h>

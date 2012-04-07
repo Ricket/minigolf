@@ -11,7 +11,7 @@ SET(MinigolfTest_SOURCE_FILES
 	
 	../src/linkedlist.cpp
 	../src/physics.cpp
-	../src/objects.cpp
+	../src/ballcuptee.cpp
 	)
 	
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/test ${PROJECT_SOURCE_DIR}/src)

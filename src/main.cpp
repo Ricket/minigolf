@@ -30,7 +30,7 @@
 #endif
 
 #include "data.h"
-#include "objects.h"
+#include "ballcuptee.h"
 #include "physics.h"
 #include "player.h"
 #include "scorecard.h"

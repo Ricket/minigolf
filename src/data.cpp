@@ -8,6 +8,7 @@
  */
 
 #include "data.h"
+#include "object.h"
 #include "linkedlist.h"
 
 #include <stdio.h>
@@ -211,11 +212,13 @@ struct course * load_course(char *filename) {
 	struct course *course;
 	struct hole *hole;
 	struct tile *tile;
+	struct object *object;
 	int i;
 
 	buffer[5000] = 0; // it should always end in a null char
 	course = NULL;
 	hole = NULL;
+	object = NULL;
 
 	fr = fopen(filename, "r");
 	if(fr == NULL) {
@@ -355,6 +358,19 @@ struct course * load_course(char *filename) {
 				}
 
 				READTOKENSTR(tok, hole->name, INVALIDNAMEDEFINITION);
+
+			} else if(strcmp(tok, "begin_object") == 0) {
+				if(hole == NULL) {
+					printf("Invalid begin_object command - no hole\n");
+					return NULL;
+				}
+
+
+			} else if(strcmp(tok, "end_object") == 0) {
+				if(hole == NULL || object == NULL) {
+					printf("Invalid end_object command\n");
+					return NULL;
+				}
 			} else {
 				printf("Ignoring unknown command: %s\n", tok);
 			}

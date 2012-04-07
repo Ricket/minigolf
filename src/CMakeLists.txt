@@ -7,7 +7,7 @@ SET(Minigolf_SOURCE_FILES
 	main.cpp
 	data.cpp
 	linkedlist.cpp
-	objects.cpp
+	ballcuptee.cpp
 	physics.cpp
 	scorecard.cpp
 	about.cpp
