@@ -105,6 +105,7 @@ static char parText[9];
 
 static struct course *course;
 static struct hole *hole;
+static int hole_num;
 static struct listnode *hole_node;
 static float timeOnHole;
 static enum gamestate gameState = GAMESTATE_BALLDIRECTION;
@@ -277,6 +278,7 @@ static void reload_course() {
 			clear_scorecard(scorecard, 4, course->num_holes);
 			for(i=0; i<4; i++) {
 				set_playername(scorecard, i, players[i]->name);
+				set_playerenabled(scorecard, i, players[i]->enabled);
 			}
 			
 			i=0;
@@ -289,6 +291,7 @@ static void reload_course() {
 
 			hole_node = (*(course->holes)).first;
 			hole = (struct hole *) hole_node->ptr;
+			hole_num = 0;
 
 			reset_hole();
 		}
@@ -330,6 +333,7 @@ static void next_hole() {
 	if(hole_node->next != NULL) {
 		hole_node = hole_node->next;
 		hole = (struct hole *)hole_node->ptr;
+		hole_num++;
 		reset_hole();
 	} else {
 		hole = NULL;
@@ -424,6 +428,7 @@ static void update_logic() {
 						if(ball->speed - CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist) < 0) {
 							/* Winner! */
 							players[currentPlayer]->done = 1;
+							add_score(scorecard, hole_num, currentPlayer, players[currentPlayer]->score);
 							gameState = GAMESTATE_BALLDIRECTION;
 							
 							if(all_players_done()) {
@@ -817,6 +822,7 @@ static void gluiQuick(int code) {
 			strcpy(players[i]->name, newPlayerNames[i]);
 			players[i]->enabled = newPlayerEnabled[i];
 			set_playername(scorecard, i, players[i]->name);
+			set_playerenabled(scorecard, i, players[i]->enabled);
 		}
 
 		reload_course();
