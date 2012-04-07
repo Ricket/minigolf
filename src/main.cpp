@@ -125,6 +125,8 @@ static void render_tile(struct tile *t);
 
 int main(int argc, char** argv) {
 	int i,j;
+	struct highscoretable *highscoretable;
+	char namebuf[30], coursebuf[30];
 
 	glutInit(&argc, argv);
 	
