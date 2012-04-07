@@ -11,6 +11,7 @@ SET(Minigolf_SOURCE_FILES
 	physics.cpp
 	scorecard.cpp
 	about.cpp
+	highscores.cpp
 	)
 
 ADD_EXECUTABLE(Minigolf ${Minigolf_SOURCE_FILES})
