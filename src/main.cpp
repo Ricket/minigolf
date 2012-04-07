@@ -34,6 +34,7 @@
 #include "physics.h"
 #include "player.h"
 #include "scorecard.h"
+#include "about.h"
 
 #ifndef max
 	#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
@@ -101,6 +102,7 @@ static char parText[9];
 #define GLUI_NEW_GAME_OK 3332
 #define GLUI_NEW_GAME_CANCEL 3333
 #define GLUI_QUIT 17734
+#define GLUI_ABOUT 17735
 #define GLUI_INPUTFILE 234
 
 static struct course *course;
@@ -154,6 +156,7 @@ int main(int argc, char** argv) {
 	/* new game and quit buttons */
 	glui->add_button("New game...", GLUI_NEW_GAME, &gluiQuick);
 	glui->add_button("Quit", GLUI_QUIT, &gluiQuick);
+	glui->add_button("About...", GLUI_ABOUT, &gluiQuick);
 	glui->add_separator();
 
 	/* camera rotation control */
@@ -834,6 +837,8 @@ static void gluiQuick(int code) {
 		next_hole();
 	} else if(code == GLUI_QUIT) {
 		exit(0);
+	} else if(code == GLUI_ABOUT) {
+		show_about_dialog();
 	}
 
 	/* if user hit OK or Cancel, free memory */
