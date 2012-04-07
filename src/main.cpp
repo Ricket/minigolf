@@ -93,6 +93,7 @@ static struct player *players[4];
 static int currentPlayer;
 static GLUI_StaticText *gluiCurrentPlayer;
 static GLUI_StaticText *gluiPar;
+static struct scorecard *scorecard;
 static GLUI *gluiScorecard;
 static char parText[9];
 
@@ -124,6 +125,9 @@ int main(int argc, char** argv) {
 	}
 
 	gluiNewGame = NULL;
+	gluiScorecard = NULL;
+
+    scorecard = (struct scorecard *)calloc(1, sizeof(struct scorecard));
 
 	for(i=0; i<4; i++) {
 		players[i] = (struct player *)calloc(1, sizeof(struct player));
@@ -182,8 +186,6 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Failed to load resources\n");
         return 1;
     }
-
-    gluiScorecard = NULL;
 
     initialize_object_textures();
     reload_course();
@@ -260,6 +262,9 @@ static void reset_hole() {
 }
 
 static void reload_course() {
+	int i;
+	struct listnode *node;
+
 	if(course != NULL) {
 		free_course(course);
 		course = NULL;
@@ -269,6 +274,19 @@ static void reload_course() {
 		course = load_course(filename);
 		/* print_hole(hole); */
 		if(course != NULL) {
+			clear_scorecard(scorecard, 4, course->num_holes);
+			for(i=0; i<4; i++) {
+				set_playername(scorecard, i, players[i]->name);
+			}
+			
+			i=0;
+			node = course->holes->first;
+			while(node != NULL) {
+				set_par(scorecard, i, ((struct hole*)node->ptr)->par);
+				i++;
+				node = node->next;
+			}
+
 			hole_node = (*(course->holes)).first;
 			hole = (struct hole *) hole_node->ptr;
 
@@ -305,7 +323,7 @@ static void next_player() {
 }
 
 static void show_scorecard() {
-	gluiScorecard = create_scorecard(hole->par, players, &gluiQuick);
+	gluiScorecard = create_scorecard(scorecard, &gluiQuick);
 }
 
 static void next_hole() {
@@ -797,10 +815,8 @@ static void gluiQuick(int code) {
 
 		for(i=0; i<4; i++) {
 			strcpy(players[i]->name, newPlayerNames[i]);
-		}
-
-		for(i=0; i<4; i++) {
 			players[i]->enabled = newPlayerEnabled[i];
+			set_playername(scorecard, i, players[i]->name);
 		}
 
 		reload_course();
@@ -810,7 +826,6 @@ static void gluiQuick(int code) {
 		gluiScorecard = NULL;
 
 		next_hole();
-
 	} else if(code == GLUI_QUIT) {
 		exit(0);
 	}
