@@ -1,0 +1,43 @@
+How to build the project in Win32
+=================================
+
+
+Get the minigolf project
+Install GLUT: http://logs.tobinelectronics.com/installing-glut-in-windows-visual-studio-2010/
+
+Run cmake-gui
+Where is the source code: path to minigolf folder
+Where to build the binaries: minigolf/vs2010
+
+Hit configure.
+
+Visual Studio 10 for VS2010.
+
+There should be errors; fix these accordingly:
+
+GLUI_INCLUDES: minigolf/lib/glui/windows
+GLUI_LIBRARIES: minigolf/lib/glui/windows/glui32.lib
+^ notice the forward slashes!
+
+Check the 'advanced' checkbox above the config area
+
+GLUT_INCLUDE_DIR: C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include
+GLUT_glut_LIBRARY: C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib/glut32.lib
+
+Now hit configure again, it should be all clear.
+Now hit generate. Then close
+
+Open the minigolf/vs2010 folder. Open the solution file. Switch to RELEASE and build solution.
+It should be missing include directories.
+Open properties of Minigolf project.
+VC++ Directories, Include Directories, click the [...] button.
+Add an entry pointing to minigolf/lib/glui/windows
+Apply, OK.
+Rebuild solution.
+Close.
+Now minigolf/vs2010/Release folder should contain the two executables.
+Copy Minigolf.exe to the minigolf/ folder, as directed in the assignment.
+
+
+To build GLUI with VS2010, look at the solution at the bottom of this blog post:
+https://masdel.wordpress.com/2010/06/13/installing-glui-using-vc-on-windows/
