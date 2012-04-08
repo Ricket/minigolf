@@ -23,6 +23,8 @@ struct object {
 	int *tile_ids;
 	struct tile *tiles;
 	int num_tiles;
+
+	float *transformation;
 };
 
 void render_object(struct object *);

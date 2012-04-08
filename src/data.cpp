@@ -17,6 +17,12 @@
 #include <math.h>
 #include <float.h>
 
+#ifdef __APPLE__
+#  include <GLUT/glut.h>
+#else
+#  include <GL/glut.h>
+#endif
+
 #define TILE_THICKNESS 0.3f
 
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
@@ -120,8 +126,10 @@ static void calculate_matrices(struct tile *tile) {
 }
 
 static void fix_height(struct hole *hole) {
-	struct listnode *node;
+	struct listnode *node, *node2;
 	struct tile *tile;
+	struct object *obj;
+	struct polygon *poly;
 	float miny = FLT_MAX;
 	int i;
 	
@@ -150,6 +158,28 @@ static void fix_height(struct hole *hole) {
 			tile->vertices[i].y = tile->vertices[i].y - miny + TILE_THICKNESS;
 		}
 		
+		node = node->next;
+	}
+	node = hole->objects->first;
+	while(node != NULL) {
+		obj = (struct object *)node->ptr;
+
+		node2 = obj->polys->first;
+		while(node2 != NULL) {
+			poly = (struct polygon *)node2->ptr;
+			for(i = 0; i < poly->num_edges; i++) {
+				poly->y[i] = poly->y[i] - miny + TILE_THICKNESS;
+			}
+
+			node2 = node2->next;
+		}
+
+		if(obj->bbox != NULL) {
+			for(i = 0; i < obj->bbox->num_points; i++) {
+				obj->bbox->y[i] = obj->bbox->y[i] - miny + TILE_THICKNESS;
+			}
+		}
+
 		node = node->next;
 	}
 	hole->tee->y = hole->tee->y - miny + TILE_THICKNESS;
@@ -217,11 +247,14 @@ struct course * load_course(char *filename) {
 	struct boundingbox *bbox;
 	int *tmpIntPtr;
 	int i;
+	float x,y,z,ang;
 
 	buffer[5000] = 0; // it should always end in a null char
 	course = NULL;
 	hole = NULL;
 	object = NULL;
+
+	glMatrixMode(GL_MODELVIEW);
 
 	fr = fopen(filename, "r");
 	if(fr == NULL) {
@@ -374,6 +407,8 @@ struct course * load_course(char *filename) {
 				object->polys = (struct linkedlist *)calloc(1, sizeof(struct linkedlist));
 				ll_push_back(hole->objects, object);
 
+				glLoadIdentity();
+
 			} else if(strcmp(tok, "end_object") == 0) {
 				if(hole == NULL || object == NULL) {
 					printf("Invalid end_object command\n");
@@ -381,6 +416,9 @@ struct course * load_course(char *filename) {
 				}
 
 				/* do any postprocessing */
+
+				object->transformation = (float*)calloc(16, sizeof(float));
+				glGetFloatv(GL_MODELVIEW_MATRIX, object->transformation);
 
 				object = NULL;
 
@@ -451,6 +489,34 @@ struct course * load_course(char *filename) {
 				READTOKENINT(tok, (*tmpIntPtr), INVALIDOBJECTDEFINITION);
 
 				tmpIntPtr = NULL;
+
+			} else if(strcmp(tok, "transformation") == 0) {
+				if(object == NULL) {
+					printf("Invalid transformation command\n");
+					return NULL;
+				}
+
+				tok = strtok(NULL, FILETOKEN);
+				if(strcmp(tok, "static") == 0) {
+					tok = strtok(NULL, FILETOKEN);
+					if(strcmp(tok, "translate") == 0) {
+						READTOKENFLOAT(tok, x, INVALIDOBJECTDEFINITION);
+						READTOKENFLOAT(tok, y, INVALIDOBJECTDEFINITION);
+						READTOKENFLOAT(tok, z, INVALIDOBJECTDEFINITION);
+						glTranslatef(x,y,z);
+					} else if(strcmp(tok, "rotate") == 0) {
+						READTOKENFLOAT(tok, ang, INVALIDOBJECTDEFINITION);
+						READTOKENFLOAT(tok, x, INVALIDOBJECTDEFINITION);
+						READTOKENFLOAT(tok, y, INVALIDOBJECTDEFINITION);
+						READTOKENFLOAT(tok, z, INVALIDOBJECTDEFINITION);
+						glRotatef(ang,x,y,z);
+					}
+				} else if(strcmp(tok, "dynamic") == 0) {
+					printf("Ignoring dynamic transformation (not implemented)\n");
+				} else {
+					printf(INVALIDOBJECTDEFINITION "\n");
+					return NULL;
+				}
 
 			} else {
 				printf("Ignoring unknown command: %s\n", tok);

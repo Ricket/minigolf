@@ -16,6 +16,10 @@ void render_object(struct object *obj) {
 	struct listnode *node;
 	struct polygon *poly;
 
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glMultMatrixf(obj->transformation);
+
 	node = obj->polys->first;
 	while(node != NULL) {
 		poly = (struct polygon*)node->ptr;
@@ -36,4 +40,6 @@ void render_object(struct object *obj) {
 
 		node = node->next;
 	}
+
+	glPopMatrix();
 }
