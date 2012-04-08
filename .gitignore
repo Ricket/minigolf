@@ -8,6 +8,7 @@ Makefile
 #Binaries
 Minigolf
 MinigolfTest
+highscores.bin
 
 #Visual Studio files
 *.user
