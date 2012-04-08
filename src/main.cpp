@@ -523,6 +523,7 @@ static void reshape(int w, int h) {
 
 static void render() {
 	struct listnode *node;
+	int i;
 	
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -564,7 +565,30 @@ static void render() {
 		draw_cup(hole->cup);
 		draw_tee(hole->tee);
 
-		
+		/* draw each player's ball except the current player */
+		for(i = 0; i < 4; i++) {
+			if(i == currentPlayer) continue;
+			if(players[i]->enabled && !players[i]->done) {
+				/* find ball tile and draw ball */
+				node = hole->tiles->first;
+				while(node != NULL) {
+					if(((struct tile *)node->ptr)->id == players[i]->ball->tile_id) {
+						break;
+					}
+					node = node->next;
+				}
+				if(node != NULL) {
+					update_ball(players[i]->ball, (struct tile *)node->ptr);
+				} else {
+					printf("Warning: ball tile not found\n");
+				}
+				
+				draw_ball(players[i]->ball);
+			}
+		}
+
+		/* now draw the current player's ball */
+
 		/* find ball tile and draw ball */
 		node = hole->tiles->first;
 		while(node != NULL) {
@@ -581,6 +605,7 @@ static void render() {
 		
 		draw_ball(players[currentPlayer]->ball);
 		
+		/* draw arrow */
 		if(gameState == GAMESTATE_BALLDIRECTION || gameState == GAMESTATE_BALLVELOCITY) {
 			draw_arrow();
 		}
