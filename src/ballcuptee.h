@@ -24,6 +24,7 @@ struct ball {
 	int tile_id;
 	float x,z;
 	float dx,dz,speed;
+	float r,g,b;
 	
 	struct tile *tile;
 };

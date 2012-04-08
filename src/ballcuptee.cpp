@@ -270,10 +270,20 @@ float ball_dy(struct ball *ball) {
 }
 
 struct ball *make_ball(struct tee *tee) {
-	struct ball *ret = (struct ball *) calloc(1, sizeof(struct ball));
+	float mag, balldy;
+	struct ball *ret;
+
+	ret = (struct ball *) calloc(1, sizeof(struct ball));
 	reset_ball(ret, tee);
 	ret->dx = 1.0f;
 	ret->dz = 0.0f;
+
+	/* normalize the ball direction */
+	balldy = ball_dy(ret);
+	mag = sqrt(ret->dx * ret->dx + balldy * balldy + ret->dz * ret->dz);
+	ret->dx /= mag;
+	ret->dz /= mag;
+
 	return ret;
 }
 
@@ -365,7 +375,7 @@ void draw_ball(struct ball *ball) {
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	
-	glColor3f(0.5f, 0.5f, 0.5f); /* color the ball gray */
+	glColor3f(ball->r, ball->g, ball->b); /* color the ball gray */
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_CIRCLE]);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0f, 1.0f); glVertex3f(ballquad.pt[0][0], ballquad.pt[0][1], ballquad.pt[0][2]);

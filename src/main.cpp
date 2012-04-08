@@ -250,6 +250,11 @@ static void reset_hole() {
 	for(i=0; i<4; i++) {
 		players[i]->ball = make_ball(hole->tee);
 	}
+	players[0]->ball->r = 1.0f; players[0]->ball->g = 0.0f; players[0]->ball->b = 0.0f;
+	players[1]->ball->r = 0.0f; players[1]->ball->g = 1.0f; players[1]->ball->b = 0.0f;
+	players[2]->ball->r = 0.0f; players[2]->ball->g = 0.0f; players[2]->ball->b = 1.0f;
+	players[3]->ball->r = 1.0f; players[3]->ball->g = 1.0f; players[3]->ball->b = 0.0f;
+
 	initialize_cuptee(hole);
 	gameState = GAMESTATE_BALLDIRECTION;
 	currentPlayer = 0;
@@ -566,7 +571,7 @@ static void render() {
 		draw_tee(hole->tee);
 
 		/* draw each player's ball except the current player */
-		for(i = 0; i < 4; i++) {
+		for(i = 3; i >= 0; i--) {
 			if(i == currentPlayer) continue;
 			if(players[i]->enabled && !players[i]->done) {
 				/* find ball tile and draw ball */
