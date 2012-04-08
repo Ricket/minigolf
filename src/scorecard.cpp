@@ -4,6 +4,8 @@
 
 #define SIZE_PLAYERNAME 50
 
+#define NO_SCORE -5000
+
 void clear_scorecard(struct scorecard *scorecard, int num_players, int num_holes) {
 	int i;
 
@@ -22,7 +24,7 @@ void clear_scorecard(struct scorecard *scorecard, int num_players, int num_holes
 
 	scorecard->scores = (int *)calloc(num_players * num_holes, sizeof(int));
 	for(i=0; i<num_players * num_holes; i++) {
-		scorecard->scores[i] = -1;
+		scorecard->scores[i] = NO_SCORE;
 	}
 	scorecard->pars = (int *)calloc(num_holes, sizeof(int));
 	scorecard->playerNames = (char**)calloc(num_players, sizeof(char*));
@@ -87,8 +89,10 @@ GLUI *create_scorecard(struct scorecard *scorecard, GLUI_CB callback) {
 			ret->add_separator_to_panel(panel);
 			for(j=0; j<scorecard->num_players; j++) {
 				if(scorecard->playerEnabled[j]) {
-					if(scorecard->scores[i * scorecard->num_players + j] == -1) {
+					if(scorecard->scores[i * scorecard->num_players + j] == NO_SCORE) {
 						ret->add_statictext_to_panel(panel, "-");
+					} else if(scorecard->scores[i * scorecard->num_players + j] == 0) {
+						ret->add_statictext_to_panel(panel, "E");
 					} else {
 						sprintf(holeNum, "%d", scorecard->scores[i * scorecard->num_players + j]);
 						ret->add_statictext_to_panel(panel, holeNum);
@@ -110,7 +114,7 @@ GLUI *create_scorecard(struct scorecard *scorecard, GLUI_CB callback) {
 			/* score */
 			score = 0;
 			for(j=0; j<scorecard->num_holes; j++) {
-				if(scorecard->scores[j * scorecard->num_players + i] > -1) {
+				if(scorecard->scores[j * scorecard->num_players + i] != NO_SCORE) {
 					score += scorecard->scores[j * scorecard->num_players + i] - scorecard->pars[j];
 				}
 			}

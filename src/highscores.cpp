@@ -257,12 +257,8 @@ void show_highscores() {
 		}
 		gluiHighscores->add_column_to_panel(panel, true);
 		for(i=0; i<highscores->num_entries; i++) {
-			if(highscores->entries[i].score == 0) {
-				gluiHighscores->add_statictext_to_panel(panel, "E");
-			} else {
-				sprintf(score, "%+d", highscores->entries[i].score);
-				gluiHighscores->add_statictext_to_panel(panel, score);
-			}
+			sprintf(score, "%+d", highscores->entries[i].score);
+			gluiHighscores->add_statictext_to_panel(panel, score);
 		}
 	} else {
 		gluiHighscores->add_statictext_to_panel(panel, "No highscores");
