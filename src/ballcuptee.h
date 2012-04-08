@@ -31,8 +31,6 @@ struct ball {
 float ball_y(struct ball *);
 float ball_dy(struct ball *);
 
-void ball_debug(struct ball *);
-
 struct ball *make_ball(struct tee *);
 
 /*

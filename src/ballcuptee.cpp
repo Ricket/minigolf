@@ -269,14 +269,6 @@ float ball_dy(struct ball *ball) {
 	return ( ball->dx * t->norm_x + ball->dz * t->norm_z ) / (-t->norm_y);
 }
 
-void ball_debug(struct ball *ball) {
-	float balldy, mag;
-
-	balldy = ball_dy(ball);
-	mag = ball->dx * ball->dx + balldy*balldy + ball->dz * ball->dz;
-	printf("ball dmag: %f\n", mag);
-}
-
 struct ball *make_ball(struct tee *tee) {
 	struct ball *ret = (struct ball *) calloc(1, sizeof(struct ball));
 	reset_ball(ret, tee);

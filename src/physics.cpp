@@ -328,23 +328,20 @@ void apply_gravity_tick(struct ball *ball) {
 	gy = GRAVITY_MAGNITUDE * (ball->tile->norm_y - 1);
 	gz = GRAVITY_MAGNITUDE * ball->tile->norm_z;
 
-	if(fabs(gx) > 0.00001f || fabs(gy) > 0.00001f || fabs(gz) > 0.00001f) {
-		printf("gravity applies\n");
-		ball->dx *= ball->speed;
-		ball->dz *= ball->speed;
-		
-		ball->dx += gx;
-		ball->dz += gz;
+	ball->dx *= ball->speed;
+	ball->dz *= ball->speed;
+	
+	ball->dx += gx;
+	ball->dz += gz;
 
-		balldy = ball_dy(ball);
-		ball->speed = sqrt(
-			ball->dx * ball->dx + 
-			balldy * balldy + 
-			ball->dz * ball->dz );
+	balldy = ball_dy(ball);
+	ball->speed = sqrt(
+		ball->dx * ball->dx + 
+		balldy * balldy + 
+		ball->dz * ball->dz );
 
-		ball->dx /= ball->speed;
-		ball->dz /= ball->speed;
-	}
+	ball->dx /= ball->speed;
+	ball->dz /= ball->speed;
 }
 
 void physics_test_static_functions() {

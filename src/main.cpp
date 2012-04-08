@@ -63,8 +63,8 @@ static void keypress(unsigned char, int, int);
 static void keypress_special(int, int, int);
 static void gluiQuick(int);
 
-#define WINDOW_WIDTH 400
-#define WINDOW_HEIGHT 300
+#define WINDOW_WIDTH 600
+#define WINDOW_HEIGHT 400
 
 #define MOUSE_SPEED_X (1.0f / 2.0f)
 #define MOUSE_SPEED_Y (-1.0f / 3.0f)
@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
 	newFilename = NULL;
 	
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-	/* glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT); */
+	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 	windowId = glutCreateWindow("Minigolf by Richard Carter");
 	GLUI_Master.set_glutIdleFunc(&update_logic);
 	glui = GLUI_Master.create_glui_subwindow(windowId, GLUI_SUBWINDOW_RIGHT);
@@ -415,18 +415,13 @@ static void update_logic() {
 			}
 			else if(gameState == GAMESTATE_BALLMOVING) {
 				
-				printf("ball initial speed  %f\n", ball->speed);
-				ball_debug(ball);
 				apply_gravity_tick(ball);
-				printf("ball after gravity  %f\n", ball->speed);
-				ball_debug(ball);
 				
 				/* move the ball, account for friction */
 				ball->x += ball->dx * ball->speed * 0.02f;
 				ball->z += ball->dz * ball->speed * 0.02f;
 				
 				ball->speed = max(ball->speed - FRICTION, 0.0f);
-				printf("ball after friction %f\n", ball->speed);
 
 				node = hole->objects->first;
 				while(node != NULL) {
