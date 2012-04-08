@@ -22,14 +22,16 @@ void draw_tee(struct tee *);
 
 struct ball {
 	int tile_id;
-	float x,y,z;
-	float dx,dy,dz,speed;
+	float x,z;
+	float dx,dz,speed;
 	
 	struct tile *tile;
 };
 
-float get_ball_px(struct ball *);
-float get_ball_pz(struct ball *);
+float ball_y(struct ball *);
+float ball_dy(struct ball *);
+
+void ball_debug(struct ball *);
 
 struct ball *make_ball(struct tee *);
 

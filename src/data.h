@@ -13,7 +13,7 @@
 
 #include "linkedlist.h"
 
-#define ARROW_SPIN_SPEED 0.04f
+#define ARROW_SPIN_SPEED 0.037f
 
 #define FILETOKEN " \n"
 #define ERRORIFNULL(s,err) { \

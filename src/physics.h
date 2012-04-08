@@ -12,7 +12,7 @@
 
 #define bool int
 
-#define GRAVITY_MAGNITUDE 0.05f
+#define GRAVITY_MAGNITUDE 0.022f
 
 struct ball;
 

@@ -69,12 +69,11 @@ static void gluiQuick(int);
 #define MOUSE_SPEED_X (1.0f / 2.0f)
 #define MOUSE_SPEED_Y (-1.0f / 3.0f)
 
-#define ARROW_LENGTH_SPEED 0.03f
+#define ARROW_LENGTH_SPEED 0.028f
 #define MIN_ARROW_LENGTH 0.1f
-#define MAX_ARROW_LENGTH 2.0f
+#define MAX_ARROW_LENGTH 2.7f
 
-#define FRICTION 0.01f
-#define GRAVITY_MAGNITUDE 0.05f
+#define FRICTION 0.006f
 
 #define CUP_VICINITY 0.10f
 #define CUP_FALLIN 100.0f
@@ -376,13 +375,14 @@ static void next_hole() {
 static void update_logic() {
 	int currentTime = glutGet(GLUT_ELAPSED_TIME);
 	bool shouldRender = false;
-	float newv[3];
+	float newv[2];
 	int closestEdge;
 	struct listnode *node;
 	float dist, dotprod, mag;
 	float dx, dy, dz;
 
 	struct ball *ball;
+	float bally;
 
 	pendingDelta += currentTime - lastUpdate;
 	
@@ -397,12 +397,10 @@ static void update_logic() {
 			ball = players[currentPlayer]->ball;
 			if(gameState == GAMESTATE_BALLDIRECTION) {
 				/* rotate the ball's velocity slightly around the tile norm */
-				newv[0] = ball->tile->rotMat[0][0]*ball->dx + ball->tile->rotMat[1][0]*ball->dy + ball->tile->rotMat[2][0]*ball->dz;
-				newv[1] = ball->tile->rotMat[0][1]*ball->dx + ball->tile->rotMat[1][1]*ball->dy + ball->tile->rotMat[2][1]*ball->dz;
-				newv[2] = ball->tile->rotMat[0][2]*ball->dx + ball->tile->rotMat[1][2]*ball->dy + ball->tile->rotMat[2][2]*ball->dz;
+				newv[0] = ball->tile->rotMat[0][0]*ball->dx + ball->tile->rotMat[1][0]*ball_dy(ball) + ball->tile->rotMat[2][0]*ball->dz;
+				newv[1] = ball->tile->rotMat[0][2]*ball->dx + ball->tile->rotMat[1][2]*ball_dy(ball) + ball->tile->rotMat[2][2]*ball->dz;
 				ball->dx = newv[0];
-				ball->dy = newv[1];
-				ball->dz = newv[2];
+				ball->dz = newv[1];
 			}
 			else if(gameState == GAMESTATE_BALLVELOCITY) {
 				/* increase/loop the ball's velocity slightly */
@@ -417,14 +415,18 @@ static void update_logic() {
 			}
 			else if(gameState == GAMESTATE_BALLMOVING) {
 				
+				printf("ball initial speed  %f\n", ball->speed);
+				ball_debug(ball);
 				apply_gravity_tick(ball);
+				printf("ball after gravity  %f\n", ball->speed);
+				ball_debug(ball);
 				
 				/* move the ball, account for friction */
 				ball->x += ball->dx * ball->speed * 0.02f;
-				ball->y += ball->dy * ball->speed * 0.02f;
 				ball->z += ball->dz * ball->speed * 0.02f;
 				
 				ball->speed = max(ball->speed - FRICTION, 0.0f);
+				printf("ball after friction %f\n", ball->speed);
 
 				node = hole->objects->first;
 				while(node != NULL) {
@@ -455,7 +457,8 @@ static void update_logic() {
 				/* check if ball is sinking into cup */
 				if(ball->tile == hole->cup->tile) {
 					/* distance squared */
-					dist = (ball->x - hole->cup->x)*(ball->x - hole->cup->x) + (ball->y - hole->cup->y)*(ball->y - hole->cup->y) + (ball->z - hole->cup->z)*(ball->z - hole->cup->z);
+					bally = ball_y(ball);
+					dist = (ball->x - hole->cup->x)*(ball->x - hole->cup->x) + (ball_y(ball) - hole->cup->y)*(ball_y(ball) - hole->cup->y) + (ball->z - hole->cup->z)*(ball->z - hole->cup->z);
 					if(dist <= CUP_VICINITY * CUP_VICINITY) {
 						if(ball->speed - CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist) < 0) {
 							/* Winner! */
@@ -469,19 +472,18 @@ static void update_logic() {
 								next_player();
 							}
 						} else {
-							dotprod = (ball->dx * (hole->cup->x - ball->x)) + (ball->dy * (hole->cup->y - ball->y)) + (ball->dz * (hole->cup->z - ball->z));
+							dotprod = (ball->dx * (hole->cup->x - ball->x)) + (ball_dy(ball) * (hole->cup->y - bally)) + (ball->dz * (hole->cup->z - ball->z));
 							if(dotprod <= 0.0f) {
 								/* ball is heading away from cup */
 								/*printf("Heading away at speed %f\n", ball->speed);
 								printf("CUP_FALLIN value = %f\n", CUP_FALLIN * (CUP_VICINITY*CUP_VICINITY - dist)); */
 								/* set its direction directly away from cup */
 								dx = -(hole->cup->x - ball->x);
-								dy = -(hole->cup->y - ball->y);
+								dy = -(hole->cup->y - bally);
 								dz = -(hole->cup->z - ball->z);
 								mag = sqrt(dx * dx + dy * dy + dz * dz);
 								if(mag > 0.002f) {
 									ball->dx = dx/mag;
-									ball->dy = dy/mag;
 									ball->dz = dz/mag;
 								}
 							}

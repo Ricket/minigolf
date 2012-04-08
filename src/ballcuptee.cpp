@@ -245,19 +245,42 @@ void draw_tee(struct tee *t) {
 	glDisable(GL_TEXTURE_2D);
 }
 
-float get_ball_px(struct ball *ball) {
-	return ball->tile->projMat[0][0]*ball->x + ball->tile->projMat[1][0]*ball->y + ball->tile->projMat[2][0]*ball->z;
+float ball_y(struct ball *ball) {
+	struct tile *t;
+	struct tile_vertex *p0;
+
+	/* (ball.pos - tile.p0) dot tile.norm = 0 */
+	t = ball->tile;
+	p0 = &(t->vertices[0]);
+
+	return ( p0->y * t->norm_y
+		- (ball->x - p0->x) * t->norm_x
+		- (ball->z - p0->z) * t->norm_z ) / t->norm_y;
 }
 
-float get_ball_pz(struct ball *ball) {
-	return ball->tile->projMat[0][2]*ball->x + ball->tile->projMat[1][2]*ball->y + ball->tile->projMat[2][2]*ball->z;
+float ball_dy(struct ball *ball) {
+	struct tile *t;
+	struct tile_vertex *p0;
+
+	/* ball.dir dot tile.norm = 0 */
+	t = ball->tile;
+	p0 = &(t->vertices[0]);
+
+	return ( ball->dx * t->norm_x + ball->dz * t->norm_z ) / (-t->norm_y);
+}
+
+void ball_debug(struct ball *ball) {
+	float balldy, mag;
+
+	balldy = ball_dy(ball);
+	mag = ball->dx * ball->dx + balldy*balldy + ball->dz * ball->dz;
+	printf("ball dmag: %f\n", mag);
 }
 
 struct ball *make_ball(struct tee *tee) {
 	struct ball *ret = (struct ball *) calloc(1, sizeof(struct ball));
 	reset_ball(ret, tee);
 	ret->dx = 1.0f;
-	ret->dy = 0.0f;
 	ret->dz = 0.0f;
 	return ret;
 }
@@ -267,7 +290,6 @@ void reset_ball(struct ball *ball, struct tee *tee) {
 		ball->tile_id = tee->tile_id;
 		ball->tile = tee->tile;
 		ball->x = tee->x;
-		ball->y = tee->y;
 		ball->z = tee->z;
 	}
 	
@@ -275,6 +297,7 @@ void reset_ball(struct ball *ball, struct tee *tee) {
 }
 
 void update_ball(struct ball *ball, struct tile *tile) {
+	float bally, balldy;
 	float vx[3], vy[3], mag;
 	int i;
 	
@@ -294,24 +317,27 @@ void update_ball(struct ball *ball, struct tile *tile) {
 		vy[i] = vy[i] / mag * TEE_3D_SIZE;
 	}
 	
+	bally = ball_y(ball);
+	balldy = ball_dy(ball);
+
 	/* surely there's a better way to do this, but oh well */
 	ballquad.pt[0][0] = ball->x - vx[0] - vy[0] + tile->norm_x * 0.001f;
-	ballquad.pt[0][1] = ball->y - vx[1] - vy[1] + tile->norm_y * 0.001f;
+	ballquad.pt[0][1] = bally   - vx[1] - vy[1] + tile->norm_y * 0.001f;
 	ballquad.pt[0][2] = ball->z - vx[2] - vy[2] + tile->norm_z * 0.001f;
 	ballquad.pt[1][0] = ball->x - vx[0] + vy[0] + tile->norm_x * 0.001f;
-	ballquad.pt[1][1] = ball->y - vx[1] + vy[1] + tile->norm_y * 0.001f;
+	ballquad.pt[1][1] = bally   - vx[1] + vy[1] + tile->norm_y * 0.001f;
 	ballquad.pt[1][2] = ball->z - vx[2] + vy[2] + tile->norm_z * 0.001f;
 	ballquad.pt[2][0] = ball->x + vx[0] + vy[0] + tile->norm_x * 0.001f;
-	ballquad.pt[2][1] = ball->y + vx[1] + vy[1] + tile->norm_y * 0.001f;
+	ballquad.pt[2][1] = bally   + vx[1] + vy[1] + tile->norm_y * 0.001f;
 	ballquad.pt[2][2] = ball->z + vx[2] + vy[2] + tile->norm_z * 0.001f;
 	ballquad.pt[3][0] = ball->x + vx[0] - vy[0] + tile->norm_x * 0.001f;
-	ballquad.pt[3][1] = ball->y + vx[1] - vy[1] + tile->norm_y * 0.001f;
+	ballquad.pt[3][1] = bally   + vx[1] - vy[1] + tile->norm_y * 0.001f;
 	ballquad.pt[3][2] = ball->z + vx[2] - vy[2] + tile->norm_z * 0.001f;
 	
 	/* TODO create arrowquad based on the arrow's rotation and the vectors */
 	
 	vy[0] = ball->dx * ball->speed;
-	vy[1] = ball->dy * ball->speed;
+	vy[1] = balldy   * ball->speed;
 	vy[2] = ball->dz * ball->speed;
 	
 	for(i = 0; i < 3; i++) {
@@ -330,16 +356,16 @@ void update_ball(struct ball *ball, struct tile *tile) {
 	
 	/* surely there's a better way to do this, but oh well */
 	arrowquad.pt[0][0] = ball->x - vx[0] + 0.1f * vy[0] + tile->norm_x * 0.001f;
-	arrowquad.pt[0][1] = ball->y - vx[1] + 0.1f * vy[1] + tile->norm_y * 0.001f;
+	arrowquad.pt[0][1] = bally   - vx[1] + 0.1f * vy[1] + tile->norm_y * 0.001f;
 	arrowquad.pt[0][2] = ball->z - vx[2] + 0.1f * vy[2] + tile->norm_z * 0.001f;
 	arrowquad.pt[1][0] = ball->x - vx[0] + 1.1f * vy[0] + tile->norm_x * 0.001f;
-	arrowquad.pt[1][1] = ball->y - vx[1] + 1.1f * vy[1] + tile->norm_y * 0.001f;
+	arrowquad.pt[1][1] = bally   - vx[1] + 1.1f * vy[1] + tile->norm_y * 0.001f;
 	arrowquad.pt[1][2] = ball->z - vx[2] + 1.1f * vy[2] + tile->norm_z * 0.001f;
 	arrowquad.pt[2][0] = ball->x + vx[0] + 1.1f * vy[0] + tile->norm_x * 0.001f;
-	arrowquad.pt[2][1] = ball->y + vx[1] + 1.1f * vy[1] + tile->norm_y * 0.001f;
+	arrowquad.pt[2][1] = bally   + vx[1] + 1.1f * vy[1] + tile->norm_y * 0.001f;
 	arrowquad.pt[2][2] = ball->z + vx[2] + 1.1f * vy[2] + tile->norm_z * 0.001f;
 	arrowquad.pt[3][0] = ball->x + vx[0] + 0.1f * vy[0] + tile->norm_x * 0.001f;
-	arrowquad.pt[3][1] = ball->y + vx[1] + 0.1f * vy[1] + tile->norm_y * 0.001f;
+	arrowquad.pt[3][1] = bally   + vx[1] + 0.1f * vy[1] + tile->norm_y * 0.001f;
 	arrowquad.pt[3][2] = ball->z + vx[2] + 0.1f * vy[2] + tile->norm_z * 0.001f;
 }
 

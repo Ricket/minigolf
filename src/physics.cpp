@@ -22,7 +22,6 @@
 #include "ballcuptee.h"
 
 bool ball_in_tile(struct ball *ball) {
-	float ballx, ballz;
 	int i, j;
 	bool inTile = false;
 	
@@ -31,15 +30,12 @@ bool ball_in_tile(struct ball *ball) {
 		return false;
 	}
 	
-	ballx = get_ball_px(ball);
-	ballz = get_ball_pz(ball);
-	
 	/* point-in-polygon algorithm found at:
 	   http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
 	*/
 	for (i = 0, j = ball->tile->num_edges-1; i < ball->tile->num_edges; j = i++) {
-		if ( ((ball->tile->proj_vertices[i].z > ballz) != (ball->tile->proj_vertices[j].z > ballz)) &&
-				(ballx < (ball->tile->proj_vertices[j].x - ball->tile->proj_vertices[i].x) * (ballz-ball->tile->proj_vertices[i].z) / (ball->tile->proj_vertices[j].z - ball->tile->proj_vertices[i].z) + ball->tile->proj_vertices[i].x) ) {
+		if ( ((ball->tile->proj_vertices[i].z > ball->z) != (ball->tile->proj_vertices[j].z > ball->z)) &&
+				(ball->x < (ball->tile->proj_vertices[j].x - ball->tile->proj_vertices[i].x) * (ball->z - ball->tile->proj_vertices[i].z) / (ball->tile->proj_vertices[j].z - ball->tile->proj_vertices[i].z) + ball->tile->proj_vertices[i].x) ) {
 			inTile = !inTile;
 		}
 	}
@@ -47,13 +43,9 @@ bool ball_in_tile(struct ball *ball) {
 }
 
 bool ball_in_obj(struct ball *ball, struct object *obj) {
-	float ballx, ballz;
 	int i, j;
 	struct boundingbox *bbox;
 	bool inTile = false;
-	
-	ballx = get_ball_px(ball);
-	ballz = get_ball_pz(ball);
 
 	bbox = obj->bbox;
 	if(bbox == NULL || bbox->num_points < 3) {
@@ -64,8 +56,8 @@ bool ball_in_obj(struct ball *ball, struct object *obj) {
 	   http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
 	*/
 	for (i = 0, j = bbox->num_points-1; i < bbox->num_points; j = i++) {
-		if ( ((bbox->z[i] > ballz) != (bbox->z[j] > ballz)) &&
-				(ballx < (bbox->x[j] - bbox->x[i]) * (ballz - bbox->z[i]) / (bbox->z[j] - bbox->z[i]) + bbox->x[i]) ) {
+		if ( ((bbox->z[i] > ball->z) != (bbox->z[j] > ball->z)) &&
+				(ball->x < (bbox->x[j] - bbox->x[i]) * (ball->z - bbox->z[i]) / (bbox->z[j] - bbox->z[i]) + bbox->x[i]) ) {
 			inTile = !inTile;
 		}
 	}
@@ -137,7 +129,7 @@ float get_distance_sq_to_edge(struct ball *ball, int edge) {
 	p0 = &(ball->tile->vertices[edge]);
 	p1 = &(ball->tile->vertices[(edge+1) % ball->tile->num_edges]);
 	
-	return get_shortest_distance_sq(p0, p1, ball->x, ball->y, ball->z);
+	return get_shortest_distance_sq(p0, p1, ball->x, ball_y(ball), ball->z);
 }
 
 float get_distance_sq_to_obj_edge(struct ball *ball, struct object *obj, int edge) {
@@ -149,7 +141,7 @@ float get_distance_sq_to_obj_edge(struct ball *ball, struct object *obj, int edg
 	return get_shortest_distance_sq_obj(
 		obj->bbox->x[edge], obj->bbox->y[edge], obj->bbox->z[edge],
 		obj->bbox->x[edge2], obj->bbox->y[edge2], obj->bbox->z[edge2],
-		ball->x, ball->y, ball->z
+		ball->x, ball_y(ball), ball->z
 		);
 }
 
@@ -192,11 +184,12 @@ int get_closest_edge_obj(struct ball *ball, struct object *obj) {
 void bounce_ball(struct ball *ball, int edge) {
 	struct tile_vertex *p0;
 	float x, y, z;
+	float balldy;
 	
 	p0 = &(ball->tile->vertices[edge]);
 	
 	x = ball->x;
-	y = ball->y;
+	y = ball_y(ball);
 	z = ball->z;
 	
 	x -= p0->x;
@@ -212,24 +205,24 @@ void bounce_ball(struct ball *ball, int edge) {
 	z += p0->z;
 	
 	ball->x = x;
-	ball->y = y;
 	ball->z = z;
 	
 	/* now the velocity */
-	x = ball->tile->edgeRotMat[edge][0]*ball->dx + ball->tile->edgeRotMat[edge][1]*ball->dy + ball->tile->edgeRotMat[edge][2]*ball->dz;
-	y = ball->tile->edgeRotMat[edge][3]*ball->dx + ball->tile->edgeRotMat[edge][4]*ball->dy + ball->tile->edgeRotMat[edge][5]*ball->dz;
-	z = ball->tile->edgeRotMat[edge][6]*ball->dx + ball->tile->edgeRotMat[edge][7]*ball->dy + ball->tile->edgeRotMat[edge][8]*ball->dz;
+	balldy = ball_dy(ball);
+	x = ball->tile->edgeRotMat[edge][0]*ball->dx + ball->tile->edgeRotMat[edge][1]*balldy + ball->tile->edgeRotMat[edge][2]*ball->dz;
+	y = ball->tile->edgeRotMat[edge][3]*ball->dx + ball->tile->edgeRotMat[edge][4]*balldy + ball->tile->edgeRotMat[edge][5]*ball->dz;
+	z = ball->tile->edgeRotMat[edge][6]*ball->dx + ball->tile->edgeRotMat[edge][7]*balldy + ball->tile->edgeRotMat[edge][8]*ball->dz;
 	
 	ball->dx = x;
-	ball->dy = y;
 	ball->dz = z;
 }
 
 void bounce_ball_bbox(struct ball *ball, struct boundingbox *bbox, int edge) {
 	float x, y, z;
+	float balldy;
 	
 	x = ball->x;
-	y = ball->y;
+	y = ball_y(ball);
 	z = ball->z;
 	
 	x -= bbox->x[edge];
@@ -245,16 +238,15 @@ void bounce_ball_bbox(struct ball *ball, struct boundingbox *bbox, int edge) {
 	z += bbox->z[edge];
 	
 	ball->x = x;
-	ball->y = y;
 	ball->z = z;
 	
 	/* now the velocity */
-	x = bbox->edgeRotMat[edge][0]*ball->dx + bbox->edgeRotMat[edge][1]*ball->dy + bbox->edgeRotMat[edge][2]*ball->dz;
-	y = bbox->edgeRotMat[edge][3]*ball->dx + bbox->edgeRotMat[edge][4]*ball->dy + bbox->edgeRotMat[edge][5]*ball->dz;
-	z = bbox->edgeRotMat[edge][6]*ball->dx + bbox->edgeRotMat[edge][7]*ball->dy + bbox->edgeRotMat[edge][8]*ball->dz;
+	balldy = ball_dy(ball);
+	x = bbox->edgeRotMat[edge][0]*ball->dx + bbox->edgeRotMat[edge][1]*balldy + bbox->edgeRotMat[edge][2]*ball->dz;
+	y = bbox->edgeRotMat[edge][3]*ball->dx + bbox->edgeRotMat[edge][4]*balldy + bbox->edgeRotMat[edge][5]*ball->dz;
+	z = bbox->edgeRotMat[edge][6]*ball->dx + bbox->edgeRotMat[edge][7]*balldy + bbox->edgeRotMat[edge][8]*ball->dz;
 	
 	ball->dx = x;
-	ball->dy = y;
 	ball->dz = z;
 }
 
@@ -293,7 +285,7 @@ void transfer_ball(struct ball *ball, int edge) {
 	sinTheta = sin(theta);
 	
 	x = ball->x;
-	y = ball->y;
+	y = ball_y(ball);
 	z = ball->z;
 	
 	x -= p0->x;
@@ -310,15 +302,14 @@ void transfer_ball(struct ball *ball, int edge) {
 	z2 += p0->z;
 	
 	ball->x = x2;
-	ball->y = y2;
 	ball->z = z2;
 	
 	/* now rotate the direction by the same amount */
 	x = ball->dx;
-	y = ball->dy;
+	y = ball_dy(ball);
 	z = ball->dz;
 	ball->dx = (cosTheta + u[0]*u[0]*(1-cosTheta)) * x + (u[0]*u[1]*(1-cosTheta) - u[2]*sinTheta) * y + (u[0]*u[2]*(1-cosTheta)+u[1]*sinTheta) * z;
-	ball->dy = (u[1]*u[0]*(1-cosTheta) + u[2]*sinTheta) * x + (cosTheta + u[1]*u[1]*(1-cosTheta)) * y + (u[1]*u[2]*(1-cosTheta) - u[0]*sinTheta) * z;
+	/*ball->dy = (u[1]*u[0]*(1-cosTheta) + u[2]*sinTheta) * x + (cosTheta + u[1]*u[1]*(1-cosTheta)) * y + (u[1]*u[2]*(1-cosTheta) - u[0]*sinTheta) * z;*/
 	ball->dz = (u[2]*u[0]*(1-cosTheta) - u[1]*sinTheta) * x + (u[2]*u[1]*(1-cosTheta) + u[0]*sinTheta) * y + (cosTheta + u[2]*u[2]*(1-cosTheta)) * z;
 	
 	/* and update the tile */
@@ -328,6 +319,7 @@ void transfer_ball(struct ball *ball, int edge) {
 
 void apply_gravity_tick(struct ball *ball) {
 	float gx,gy,gz;
+	float balldy;
 
 	/* gravity (down) is [0,-1,0] */
 	/* tile norm is upwards */
@@ -336,22 +328,23 @@ void apply_gravity_tick(struct ball *ball) {
 	gy = GRAVITY_MAGNITUDE * (ball->tile->norm_y - 1);
 	gz = GRAVITY_MAGNITUDE * ball->tile->norm_z;
 
-	ball->dx *= ball->speed;
-	ball->dy *= ball->speed;
-	ball->dz *= ball->speed;
-	
-	ball->dx += gx;
-	ball->dy += gy;
-	ball->dz += gz;
+	if(fabs(gx) > 0.00001f || fabs(gy) > 0.00001f || fabs(gz) > 0.00001f) {
+		printf("gravity applies\n");
+		ball->dx *= ball->speed;
+		ball->dz *= ball->speed;
+		
+		ball->dx += gx;
+		ball->dz += gz;
 
-	ball->speed = sqrt(
-		ball->dx * ball->dx + 
-		ball->dy * ball->dy + 
-		ball->dz * ball->dz );
+		balldy = ball_dy(ball);
+		ball->speed = sqrt(
+			ball->dx * ball->dx + 
+			balldy * balldy + 
+			ball->dz * ball->dz );
 
-	ball->dx /= ball->speed;
-	ball->dy /= ball->speed;
-	ball->dz /= ball->speed;
+		ball->dx /= ball->speed;
+		ball->dz /= ball->speed;
+	}
 }
 
 void physics_test_static_functions() {
