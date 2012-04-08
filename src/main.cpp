@@ -378,6 +378,7 @@ static void update_logic() {
 	bool shouldRender = false;
 	float newv[3];
 	int closestEdge;
+	struct listnode *node;
 	float dist, dotprod, mag;
 	float dx, dy, dz;
 
@@ -432,6 +433,18 @@ static void update_logic() {
 				ball->z += ball->dz * ball->speed * 0.02f;
 				
 				ball->speed = max(ball->speed - FRICTION, 0.0f);
+
+				node = hole->objects->first;
+				while(node != NULL) {
+					if(ball_in_obj(ball, (struct object *)node->ptr)) {
+						printf("bounce against object\n");
+						closestEdge = get_closest_edge_obj(ball, (struct object *)node->ptr);
+						bounce_ball_bbox(ball, ((struct object *)node->ptr)->bbox, closestEdge);
+						node = hole->objects->first;
+					}
+
+					node = node->next;
+				}
 
 				/* if ball exits current tile, bounce or switch tiles */
 				while(!ball_in_tile(ball)) {

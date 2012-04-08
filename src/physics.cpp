@@ -18,6 +18,7 @@
 #include <math.h>
 
 #include "data.h"
+#include "object.h"
 #include "ballcuptee.h"
 
 bool ball_in_tile(struct ball *ball) {
@@ -39,6 +40,32 @@ bool ball_in_tile(struct ball *ball) {
 	for (i = 0, j = ball->tile->num_edges-1; i < ball->tile->num_edges; j = i++) {
 		if ( ((ball->tile->proj_vertices[i].z > ballz) != (ball->tile->proj_vertices[j].z > ballz)) &&
 				(ballx < (ball->tile->proj_vertices[j].x - ball->tile->proj_vertices[i].x) * (ballz-ball->tile->proj_vertices[i].z) / (ball->tile->proj_vertices[j].z - ball->tile->proj_vertices[i].z) + ball->tile->proj_vertices[i].x) ) {
+			inTile = !inTile;
+		}
+	}
+	return inTile;
+}
+
+bool ball_in_obj(struct ball *ball, struct object *obj) {
+	float ballx, ballz;
+	int i, j;
+	struct boundingbox *bbox;
+	bool inTile = false;
+	
+	ballx = get_ball_px(ball);
+	ballz = get_ball_pz(ball);
+
+	bbox = obj->bbox;
+	if(bbox == NULL || bbox->num_points < 3) {
+		return false;
+	}
+	
+	/* point-in-polygon algorithm found at:
+	   http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+	*/
+	for (i = 0, j = bbox->num_points-1; i < bbox->num_points; j = i++) {
+		if ( ((bbox->z[i] > ballz) != (bbox->z[j] > ballz)) &&
+				(ballx < (bbox->x[j] - bbox->x[i]) * (ballz - bbox->z[i]) / (bbox->z[j] - bbox->z[i]) + bbox->x[i]) ) {
 			inTile = !inTile;
 		}
 	}
@@ -77,6 +104,30 @@ static float get_shortest_distance_sq(struct tile_vertex *p0, struct tile_vertex
 	}
 }
 
+static float get_shortest_distance_sq_obj(float x0, float y0, float z0, float x1, float y1, float z1, float x, float y, float z) {
+	float lsq, t;
+	
+	lsq = distance_sq(x0, y0, z0, x1, y1, z1);
+	if(lsq == 0.0f) {
+		/* p0 and p1 are the same; invalid tile, but oh well */
+		return distance_sq(x, y, z, x0, y0, z0);
+	}
+	
+	t = dot(x - x0, y - y0, z - z0, x1 - x0, y1 - y0, z1 - z0);
+	t /= lsq;
+	if(t <= 0.0f) {
+		return distance_sq(x, y, z, x0, y0, z0);
+	} else if(t >= 1.0f) {
+		return distance_sq(x, y, z, x1, y1, z1);
+	} else {
+		return distance_sq(x, y, z,
+			x0 + t * (x1 - x0),
+			y0 + t * (y1 - y0),
+			z0 + t * (z1 - z0)
+			);
+	}
+}
+
 float get_distance_sq_to_edge(struct ball *ball, int edge) {
 	struct tile_vertex *p0, *p1;
 	
@@ -87,6 +138,19 @@ float get_distance_sq_to_edge(struct ball *ball, int edge) {
 	p1 = &(ball->tile->vertices[(edge+1) % ball->tile->num_edges]);
 	
 	return get_shortest_distance_sq(p0, p1, ball->x, ball->y, ball->z);
+}
+
+float get_distance_sq_to_obj_edge(struct ball *ball, struct object *obj, int edge) {
+	int edge2;
+	
+	edge2 = (edge+1) % obj->bbox->num_points;
+	
+	/* return get_shortest_distance_sq(p0, p1, ball->x, ball->y, ball->z); */
+	return get_shortest_distance_sq_obj(
+		obj->bbox->x[edge], obj->bbox->y[edge], obj->bbox->z[edge],
+		obj->bbox->x[edge2], obj->bbox->y[edge2], obj->bbox->z[edge2],
+		ball->x, ball->y, ball->z
+		);
 }
 
 int get_closest_edge(struct ball *ball) {
@@ -107,12 +171,29 @@ int get_closest_edge(struct ball *ball) {
 	return closestEdge;
 }
 
+int get_closest_edge_obj(struct ball *ball, struct object *obj) {
+	int closestEdge = 0;
+	float closestEdgeDist = get_distance_sq_to_obj_edge(ball, obj, 0);
+	int i;
+	float d;
+	
+	for(i = 1; i < ball->tile->num_edges; i++) {
+		d = get_distance_sq_to_obj_edge(ball, obj, i);
+
+		if(d < closestEdgeDist) {
+			closestEdge = i;
+			closestEdgeDist = d;
+		}
+	}
+	
+	return closestEdge;
+}
+
 void bounce_ball(struct ball *ball, int edge) {
-	struct tile_vertex *p0, *p1;
+	struct tile_vertex *p0;
 	float x, y, z;
 	
 	p0 = &(ball->tile->vertices[edge]);
-	p1 = &(ball->tile->vertices[(edge+1) % ball->tile->num_edges]);
 	
 	x = ball->x;
 	y = ball->y;
@@ -138,6 +219,39 @@ void bounce_ball(struct ball *ball, int edge) {
 	x = ball->tile->edgeRotMat[edge][0]*ball->dx + ball->tile->edgeRotMat[edge][1]*ball->dy + ball->tile->edgeRotMat[edge][2]*ball->dz;
 	y = ball->tile->edgeRotMat[edge][3]*ball->dx + ball->tile->edgeRotMat[edge][4]*ball->dy + ball->tile->edgeRotMat[edge][5]*ball->dz;
 	z = ball->tile->edgeRotMat[edge][6]*ball->dx + ball->tile->edgeRotMat[edge][7]*ball->dy + ball->tile->edgeRotMat[edge][8]*ball->dz;
+	
+	ball->dx = x;
+	ball->dy = y;
+	ball->dz = z;
+}
+
+void bounce_ball_bbox(struct ball *ball, struct boundingbox *bbox, int edge) {
+	float x, y, z;
+	
+	x = ball->x;
+	y = ball->y;
+	z = ball->z;
+	
+	x -= bbox->x[edge];
+	y -= bbox->y[edge];
+	z -= bbox->z[edge];
+	
+	x = bbox->edgeRotMat[edge][0]*x + bbox->edgeRotMat[edge][1]*y + bbox->edgeRotMat[edge][2]*z;
+	y = bbox->edgeRotMat[edge][3]*x + bbox->edgeRotMat[edge][4]*y + bbox->edgeRotMat[edge][5]*z;
+	z = bbox->edgeRotMat[edge][6]*x + bbox->edgeRotMat[edge][7]*y + bbox->edgeRotMat[edge][8]*z;
+	
+	x += bbox->x[edge];
+	y += bbox->y[edge];
+	z += bbox->z[edge];
+	
+	ball->x = x;
+	ball->y = y;
+	ball->z = z;
+	
+	/* now the velocity */
+	x = bbox->edgeRotMat[edge][0]*ball->dx + bbox->edgeRotMat[edge][1]*ball->dy + bbox->edgeRotMat[edge][2]*ball->dz;
+	y = bbox->edgeRotMat[edge][3]*ball->dx + bbox->edgeRotMat[edge][4]*ball->dy + bbox->edgeRotMat[edge][5]*ball->dz;
+	z = bbox->edgeRotMat[edge][6]*ball->dx + bbox->edgeRotMat[edge][7]*ball->dy + bbox->edgeRotMat[edge][8]*ball->dz;
 	
 	ball->dx = x;
 	ball->dy = y;

@@ -15,6 +15,9 @@ struct polygon {
 struct boundingbox {
 	int num_points;
 	float *x, *y, *z;
+
+	float **edgeRotMat; /* array of matrices of rotation around the edges */
+	float **edgeNorm; /* array of norm vectors */
 };
 
 struct object {
@@ -27,6 +30,7 @@ struct object {
 	float *transformation;
 };
 
+void apply_static_transformation(struct object *);
 void render_object(struct object *);
 
 #endif

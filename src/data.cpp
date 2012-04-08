@@ -125,6 +125,59 @@ static void calculate_matrices(struct tile *tile) {
 	}
 }
 
+static void calculate_matrices_obj(struct object *obj) {
+	float u[3], umag;
+	int i,j;
+	
+	if(obj->bbox != NULL && obj->bbox->num_points > 1) {
+		/* calculate edge rotation matrices */
+		obj->bbox->edgeRotMat = (float **) calloc(obj->bbox->num_points, sizeof(float *));
+		for(i = 0; i < obj->bbox->num_points; i++) {
+			obj->bbox->edgeRotMat[i] = (float *) calloc(9, sizeof(float));
+
+			j = (i+1) % obj->bbox->num_points;
+
+			u[0] = obj->bbox->x[j] - obj->bbox->x[i];
+			u[1] = obj->bbox->y[j] - obj->bbox->y[i];
+			u[2] = obj->bbox->z[j] - obj->bbox->z[i];
+			umag = sqrt(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
+			for(j = 0; j < 3; j++) {
+				u[j] = u[j] / umag;
+			}
+			
+			obj->bbox->edgeRotMat[i][0] = 2*u[0]*u[0]-1;
+			obj->bbox->edgeRotMat[i][1] = 2*u[0]*u[1];
+			obj->bbox->edgeRotMat[i][2] = 2*u[0]*u[2];
+			obj->bbox->edgeRotMat[i][3] = 2*u[0]*u[1];
+			obj->bbox->edgeRotMat[i][4] = 2*u[1]*u[1]-1;
+			obj->bbox->edgeRotMat[i][5] = 2*u[1]*u[2];
+			obj->bbox->edgeRotMat[i][6] = 2*u[0]*u[2];
+			obj->bbox->edgeRotMat[i][7] = 2*u[1]*u[2];
+			obj->bbox->edgeRotMat[i][8] = 2*u[2]*u[2]-1;
+		}
+
+		/* calculate bbox edge norms */
+		obj->bbox->edgeNorm = (float**) calloc(obj->bbox->num_points, sizeof(float*));
+		for(i = 0; i < obj->bbox->num_points; i++) {
+			j = (i+1) % obj->bbox->num_points;
+
+			u[0] = obj->bbox->x[j] - obj->bbox->x[i];
+			u[1] = obj->bbox->y[j] - obj->bbox->y[i];
+			u[2] = obj->bbox->z[j] - obj->bbox->z[i];
+			umag = sqrt(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
+			for(j = 0; j < 3; j++) {
+				u[j] = u[j] / umag;
+			}
+
+			obj->bbox->edgeNorm[i] = (float*) calloc(3, sizeof(float));
+			/* u cross up (up = [0,1,0]) */
+			obj->bbox->edgeNorm[i][0] = u[1]*0 - u[2]*1;
+			obj->bbox->edgeNorm[i][1] = u[2]*0 - u[0]*0;
+			obj->bbox->edgeNorm[i][2] = u[0]*1 - u[1]*0;
+		}
+	}
+}
+
 static void fix_height(struct hole *hole) {
 	struct listnode *node, *node2;
 	struct tile *tile;
@@ -419,6 +472,9 @@ struct course * load_course(char *filename) {
 
 				object->transformation = (float*)calloc(16, sizeof(float));
 				glGetFloatv(GL_MODELVIEW_MATRIX, object->transformation);
+				apply_static_transformation(object);
+
+				calculate_matrices_obj(object);
 
 				object = NULL;
 
