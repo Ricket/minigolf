@@ -12,6 +12,8 @@
 
 #define bool int
 
+#define GRAVITY_MAGNITUDE 0.05f
+
 struct ball;
 
 bool ball_in_tile(struct ball *);
@@ -22,6 +24,8 @@ int ball_crosses_obj(struct ball *, float, float, float, struct object *);
 void bounce_ball(struct ball *, int);
 void bounce_ball_bbox(struct ball *, struct boundingbox *, int);
 void transfer_ball(struct ball *, int);
+
+void apply_gravity_tick(struct ball *);
 
 
 void physics_test_static_functions();

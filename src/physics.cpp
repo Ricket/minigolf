@@ -326,6 +326,34 @@ void transfer_ball(struct ball *ball, int edge) {
 	ball->tile_id = tile1->id;
 }
 
+void apply_gravity_tick(struct ball *ball) {
+	float gx,gy,gz;
+
+	/* gravity (down) is [0,-1,0] */
+	/* tile norm is upwards */
+	/* tile_norm - gravity = influence of gravity on ball */
+	gx = GRAVITY_MAGNITUDE * ball->tile->norm_x;
+	gy = GRAVITY_MAGNITUDE * (ball->tile->norm_y - 1);
+	gz = GRAVITY_MAGNITUDE * ball->tile->norm_z;
+
+	ball->dx *= ball->speed;
+	ball->dy *= ball->speed;
+	ball->dz *= ball->speed;
+	
+	ball->dx += gx;
+	ball->dy += gy;
+	ball->dz += gz;
+
+	ball->speed = sqrt(
+		ball->dx * ball->dx + 
+		ball->dy * ball->dy + 
+		ball->dz * ball->dz );
+
+	ball->dx /= ball->speed;
+	ball->dy /= ball->speed;
+	ball->dz /= ball->speed;
+}
+
 void physics_test_static_functions() {
 	assert( abs(distance_sq(0,0,0,1,1,1) - 3.0f) < 0.0001f );
 	assert( abs(distance_sq(0,1,2,3,4,5) - 27.0f) < 0.0001f );

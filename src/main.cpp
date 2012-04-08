@@ -416,16 +416,8 @@ static void update_logic() {
 				}
 			}
 			else if(gameState == GAMESTATE_BALLMOVING) {
-				/* apply gravity to ball->speed */
-				/*
-				ball->speed -= GRAVITY_MAGNITUDE * sqrt(ball->tile->norm_z*ball->tile->norm_z + ball->tile->norm_x*ball->tile->norm_x);
-				if(ball->speed < 0.0f) {
-					ball->speed = -ball->speed;
-					ball->dx = -ball->dx;
-					ball->dy = -ball->dy;
-					ball->dz = -ball->dz;
-				}
-				*/
+				
+				apply_gravity_tick(ball);
 				
 				/* move the ball, account for friction */
 				ball->x += ball->dx * ball->speed * 0.02f;
