@@ -83,9 +83,9 @@ enum gamestate {
 
 static int windowId;
 static GLUI *glui, *gluiNewGame;
-static char *newFilename;
+static std::string newFilename;
 static int newPlayerEnabled[4];
-static char *newPlayerNames[4];
+static std::string newPlayerNames[4];
 
 static char *filename;
 static struct player *players[4];
@@ -138,7 +138,7 @@ int main(int argc, char** argv) {
 		players[i] = (struct player *)calloc(1, sizeof(struct player));
 		players[i]->name = (char*)calloc(1, SIZE_PLAYERNAME);
 
-		newPlayerNames[i] = NULL;
+		newPlayerNames[i] = "";
 	}
 	players[0]->enabled = 1;
 	strcpy(players[0]->name, "Player 1");
@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
 	if(argc >= 2) {
 		strncpy(filename, argv[1], SIZE_FILENAME);
 	}
-	newFilename = NULL;
+	newFilename = "";
 	
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -852,25 +852,28 @@ static void gluiQuick(int code) {
 		gluiNewGame = GLUI_Master.create_glui("New Game");
 
 		/* copy current values into the live variables */
-		newFilename = (char*)calloc(1, SIZE_FILENAME);
-		strcpy(newFilename, filename);
-		gluiNewGame->add_edittext("Input file:", GLUI_EDITTEXT_TEXT, newFilename);
+		newFilename = std::string(filename);
+		/*gluiNewGame->add_edittext("Input file:", GLUI_EDITTEXT_STRING, newFilename);*/
+		new GLUI_EditText(gluiNewGame, "Input file:", newFilename);
 
 		for(i=0; i<4; i++) {
 			newPlayerEnabled[i] = players[i]->enabled;
-			newPlayerNames[i] = (char*)calloc(1, SIZE_PLAYERNAME);
-			strncpy(newPlayerNames[i], players[i]->name, SIZE_PLAYERNAME);
+			newPlayerNames[i] = std::string(players[i]->name);
 		}
 
 		/* add the controls to the new game window */
-		gluiNewGame->add_checkbox("Player 1", &newPlayerEnabled[0])->disable();
-		gluiNewGame->add_edittext("Player 1 name", GLUI_EDITTEXT_TEXT, newPlayerNames[0]);
-		gluiNewGame->add_checkbox("Player 2", &newPlayerEnabled[1]);
-		gluiNewGame->add_edittext("Player 2 name", GLUI_EDITTEXT_TEXT, newPlayerNames[1]);
-		gluiNewGame->add_checkbox("Player 3", &newPlayerEnabled[2]);
-		gluiNewGame->add_edittext("Player 3 name", GLUI_EDITTEXT_TEXT, newPlayerNames[2]);
-		gluiNewGame->add_checkbox("Player 4", &newPlayerEnabled[3]);
-		gluiNewGame->add_edittext("Player 4 name", GLUI_EDITTEXT_TEXT, newPlayerNames[3]);
+		gluiNewGame->add_checkbox("Player 1", &(newPlayerEnabled[0]))->disable();
+		/*gluiNewGame->add_edittext("Player 1 name", GLUI_EDITTEXT_STRING, newPlayerNames[0]);*/
+		new GLUI_EditText(gluiNewGame, "Player 1 name", newPlayerNames[0]);
+		gluiNewGame->add_checkbox("Player 2", &(newPlayerEnabled[1]));
+		/*gluiNewGame->add_edittext("Player 2 name", GLUI_EDITTEXT_STRING, newPlayerNames[1]);*/
+		new GLUI_EditText(gluiNewGame, "Player 2 name", newPlayerNames[1]);
+		gluiNewGame->add_checkbox("Player 3", &(newPlayerEnabled[2]));
+		/*gluiNewGame->add_edittext("Player 3 name", GLUI_EDITTEXT_STRING, newPlayerNames[2]);*/
+		new GLUI_EditText(gluiNewGame, "Player 3 name", newPlayerNames[2]);
+		gluiNewGame->add_checkbox("Player 4", &(newPlayerEnabled[3]));
+		/*gluiNewGame->add_edittext("Player 4 name", GLUI_EDITTEXT_STRING, newPlayerNames[3]);*/
+		new GLUI_EditText(gluiNewGame, "Player 4 name", newPlayerNames[3]);
 
 		/* OK and cancel buttons */
 		gluiNewGame->add_button("OK", GLUI_NEW_GAME_OK, &gluiQuick);
@@ -878,19 +881,21 @@ static void gluiQuick(int code) {
 
 	} else if(code == GLUI_NEW_GAME_OK) {
 		/* user clicked OK; copy new values into vals */
-		if(strlen(newFilename) > 0) {
-			strcpy(filename, newFilename);
-		}
-
-		for(i=0; i<4; i++) {
-			strcpy(players[i]->name, newPlayerNames[i]);
-			players[i]->enabled = newPlayerEnabled[i];
-			set_playername(scorecard, i, players[i]->name);
-			set_playerenabled(scorecard, i, players[i]->enabled);
+		if(newFilename.length() > 0) {
+			strcpy(filename, newFilename.c_str());
 		}
 
 		reload_course();
 
+		if(course != NULL) {
+			clear_scorecard(scorecard, 4, course->num_holes);
+			for(i=0; i<4; i++) {
+				strcpy(players[i]->name, newPlayerNames[i].c_str());
+				players[i]->enabled = newPlayerEnabled[i];
+				set_playername(scorecard, i, players[i]->name);
+				set_playerenabled(scorecard, i, players[i]->enabled);
+			}
+		}
 	} else if(code == SCORECARD_OK) {
 		gluiScorecard->close();
 		gluiScorecard = NULL;
@@ -909,9 +914,9 @@ static void gluiQuick(int code) {
 		gluiNewGame->close();
 		gluiNewGame = NULL;
 
-		free(newFilename); newFilename = NULL;
+		newFilename = "";
 		for(i=0; i<4; i++) {
-			free(newPlayerNames[i]); newPlayerNames[i] = NULL;
+			newPlayerNames[i] = "";
 		}
 	}
 }

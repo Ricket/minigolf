@@ -9,6 +9,8 @@
 void clear_scorecard(struct scorecard *scorecard, int num_players, int num_holes) {
 	int i;
 
+	printf("clear_scorecard\n");
+
 	if(scorecard->scores != NULL) {
 		free(scorecard->scores);
 	}
