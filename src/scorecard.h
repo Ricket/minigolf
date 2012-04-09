@@ -1,3 +1,12 @@
+/**
+ * scorecard.h
+ * Create, clear and add data to a scorecard, and display it with GLUI.
+ *
+ * Richard Carter
+ * 2012/04/08
+ * CSC 462 Assignment 4: External Objects
+ */
+
 #ifndef SCORECARD_H
 #define SCORECARD_H
 

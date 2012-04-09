@@ -1,10 +1,10 @@
 /**
- * testphysics.c
+ * testphysics.cpp
  * Test cases for the physics functions.
  *
  * Richard Carter
- * 2012/02/19
- * CSC 462 Assignment 2: Ball Physics
+ * 2012/04/08
+ * CSC 462 Assignment 4: External Objects
  */
 
 #include "testphysics.h"

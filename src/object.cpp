@@ -1,3 +1,12 @@
+/**
+ * object.cpp
+ * Functions for manipulating and rendering an object.
+ *
+ * Richard Carter
+ * 2012/04/08
+ * CSC 462 Assignment 4: External Objects
+ */
+
 #include "object.h"
 #include "linkedlist.h"
 

@@ -1,3 +1,12 @@
+/**
+ * highscores.cpp
+ * CRUD highscores
+ *
+ * Richard Carter
+ * 2012/04/08
+ * CSC 462 Assignment 4: External Objects
+ */
+
 #include "highscores.h"
 
 #include <stdio.h>

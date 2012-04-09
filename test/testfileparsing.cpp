@@ -1,3 +1,12 @@
+/**
+ * testfileparsing.cpp
+ * Testing READTOKENSTR to ensure it handles quotes properly.
+ *
+ * Richard Carter
+ * 2012/04/08
+ * CSC 462 Assignment 4: External Objects
+ */
+
 #include "testfileparsing.h"
 
 #include "../src/data.h"

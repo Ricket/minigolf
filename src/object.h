@@ -1,3 +1,12 @@
+/**
+ * object.h
+ * Definition of structs for objects, and functions for manipulation and rendering.
+ *
+ * Richard Carter
+ * 2012/04/08
+ * CSC 462 Assignment 4: External Objects
+ */
+
 #ifndef OBJECT_H
 #define OBJECT_H
 

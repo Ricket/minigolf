@@ -3,8 +3,8 @@
  * Physics functions
  *
  * Richard Carter
- * 2012/02/19
- * CSC 462 Assignment 2: Ball Physics
+ * 2012/04/08
+ * CSC 462 Assignment 4: External Objects
  */
 
 #ifndef PHYSICS_H

@@ -1,3 +1,12 @@
+/**
+ * about.cpp
+ * About dialog creation functions.
+ *
+ * Richard Carter
+ * 2012/04/08
+ * CSC 462 Assignment 4: External Objects
+ */
+
 #include "about.h"
 
 #include <GL/glui.h>

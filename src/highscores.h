@@ -1,3 +1,12 @@
+/**
+ * highscores.h
+ * CRUD highscores
+ *
+ * Richard Carter
+ * 2012/04/08
+ * CSC 462 Assignment 4: External Objects
+ */
+
 #ifndef HIGHSCORES_H
 #define HIGHSCORES_H
 
