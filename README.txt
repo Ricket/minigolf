@@ -62,5 +62,4 @@ the highscores will appear and entries will have been added for any players
 who achieved a new high score. Up to 10 high scores are stored at once.
 
 == Known bugs/shortcomings
-I have seen a rare bug where the game stops responding but it's extremely
-difficult to reproduce.
+Only static object transformations are supported.
