@@ -16,9 +16,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#define bool int
-#define true 1
-#define false 0
 #include <limits.h>
 #include <math.h>
 #define PI 3.14159265f

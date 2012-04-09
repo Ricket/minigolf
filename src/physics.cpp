@@ -11,9 +11,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#define bool int
-#define true 1
-#define false 0
 #include <assert.h>
 #include <math.h>
 
