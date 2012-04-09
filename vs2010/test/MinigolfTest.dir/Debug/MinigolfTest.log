@@ -1,0 +1,265 @@
+﻿Build started 4/8/2012 6:29:53 PM.
+Project "C:\Users\Ricky\Dev\minigolf\vs2010\test\MinigolfTest.vcxproj" on node 2 (build target(s)).
+InitializeBuildStatus:
+  Creating "MinigolfTest.dir\Debug\MinigolfTest.unsuccessfulbuild" because "AlwaysCreate" was specified.
+CustomBuild:
+  Building Custom Rule C:/Users/Ricky/Dev/minigolf/test/CMakeLists.txt
+  CMake does not need to re-run because C:\Users\Ricky\Dev\minigolf\vs2010\test\CMakeFiles\generate.stamp is up-to-date.
+ClCompile:
+  c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include" /IC:/Users/Ricky/Dev/minigolf/test/test /IC:/Users/Ricky/Dev/minigolf/test/src /Zi /nologo /Wall /WX- /Od /Ob0 /Oy- /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"MinigolfTest.dir\Debug\\" /Fd"C:/Users/Ricky/Dev/minigolf/vs2010/Debug/MinigolfTest.pdb" /Gd /TP /analyze- /errorReport:prompt C:\Users\Ricky\Dev\minigolf\test\testmain.cpp C:\Users\Ricky\Dev\minigolf\test\testlinkedlist.cpp C:\Users\Ricky\Dev\minigolf\test\testphysics.cpp C:\Users\Ricky\Dev\minigolf\test\testfileparsing.cpp C:\Users\Ricky\Dev\minigolf\src\linkedlist.cpp C:\Users\Ricky\Dev\minigolf\src\physics.cpp C:\Users\Ricky\Dev\minigolf\src\ballcuptee.cpp  -g 
+cl : Command line warning D9002: ignoring unknown option '-g'
+  testmain.cpp
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(36): warning C4514: 'swprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(49): warning C4514: 'vswprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(60): warning C4514: '_swprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(73): warning C4514: '_vswprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(85): warning C4514: 'swprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(97): warning C4514: 'vswprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(105): warning C4514: '_swprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(117): warning C4514: '_vswprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(440): warning C4514: 'getwchar' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(442): warning C4514: 'putwchar' : unreferenced inline function has been removed
+  testlinkedlist.cpp
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(467): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(471): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(475): warning C4514: 'div' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(479): warning C4514: 'div' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(36): warning C4514: 'swprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(49): warning C4514: 'vswprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(60): warning C4514: '_swprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(73): warning C4514: '_vswprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(85): warning C4514: 'swprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(97): warning C4514: 'vswprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(105): warning C4514: '_swprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(117): warning C4514: '_vswprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(440): warning C4514: 'getwchar' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(442): warning C4514: 'putwchar' : unreferenced inline function has been removed
+  testphysics.cpp
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(467): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(471): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(475): warning C4514: 'div' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(479): warning C4514: 'div' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(36): warning C4514: 'swprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(49): warning C4514: 'vswprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(60): warning C4514: '_swprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(73): warning C4514: '_vswprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(85): warning C4514: 'swprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(97): warning C4514: 'vswprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(105): warning C4514: '_swprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(117): warning C4514: '_vswprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(440): warning C4514: 'getwchar' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(442): warning C4514: 'putwchar' : unreferenced inline function has been removed
+  testfileparsing.cpp
+C:\Users\Ricky\Dev\minigolf\test\testfileparsing.cpp(23): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(105) : see declaration of 'strcpy'
+C:\Users\Ricky\Dev\minigolf\test\testfileparsing.cpp(25): warning C4996: 'strtok': This function or variable may be unsafe. Consider using strtok_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(197) : see declaration of 'strtok'
+C:\Users\Ricky\Dev\minigolf\test\testfileparsing.cpp(28): warning C4996: 'strtok': This function or variable may be unsafe. Consider using strtok_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(197) : see declaration of 'strtok'
+C:\Users\Ricky\Dev\minigolf\test\testfileparsing.cpp(28): warning C4365: '=' : conversion from 'size_t' to 'int', signed/unsigned mismatch
+C:\Users\Ricky\Dev\minigolf\test\testfileparsing.cpp(28): warning C4365: 'argument' : conversion from 'int' to 'size_t', signed/unsigned mismatch
+C:\Users\Ricky\Dev\minigolf\test\testfileparsing.cpp(28): warning C4365: 'argument' : conversion from 'int' to 'size_t', signed/unsigned mismatch
+C:\Users\Ricky\Dev\minigolf\test\testfileparsing.cpp(28): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(188) : see declaration of 'strncpy'
+C:\Users\Ricky\Dev\minigolf\test\testfileparsing.cpp(28): warning C4365: '=' : conversion from 'size_t' to 'int', signed/unsigned mismatch
+C:\Users\Ricky\Dev\minigolf\test\testfileparsing.cpp(28): warning C4365: 'argument' : conversion from 'int' to 'size_t', signed/unsigned mismatch
+C:\Users\Ricky\Dev\minigolf\test\testfileparsing.cpp(28): warning C4365: 'argument' : conversion from 'int' to 'size_t', signed/unsigned mismatch
+C:\Users\Ricky\Dev\minigolf\test\testfileparsing.cpp(30): warning C4996: 'strtok': This function or variable may be unsafe. Consider using strtok_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(197) : see declaration of 'strtok'
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(36): warning C4514: 'swprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(49): warning C4514: 'vswprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(60): warning C4514: '_swprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(73): warning C4514: '_vswprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(85): warning C4514: 'swprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(97): warning C4514: 'vswprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(105): warning C4514: '_swprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(117): warning C4514: '_vswprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(440): warning C4514: 'getwchar' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(442): warning C4514: 'putwchar' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(467): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(471): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(475): warning C4514: 'div' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(479): warning C4514: 'div' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(115): warning C4514: 'strnlen_s' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(216): warning C4514: 'strpbrk' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(220): warning C4514: 'strstr' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(225): warning C4514: 'memchr' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(288): warning C4514: 'wcsnlen_s' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(361): warning C4514: 'wcschr' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(363): warning C4514: 'wcspbrk' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(365): warning C4514: 'wcsrchr' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(367): warning C4514: 'wcsstr' : unreferenced inline function has been removed
+  linkedlist.cpp
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(467): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(471): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(475): warning C4514: 'div' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(479): warning C4514: 'div' : unreferenced inline function has been removed
+  physics.cpp
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(36): warning C4514: 'swprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(49): warning C4514: 'vswprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(60): warning C4514: '_swprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(73): warning C4514: '_vswprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(85): warning C4514: 'swprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(97): warning C4514: 'vswprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(105): warning C4514: '_swprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(117): warning C4514: '_vswprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(440): warning C4514: 'getwchar' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(442): warning C4514: 'putwchar' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(467): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(471): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(475): warning C4514: 'div' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(479): warning C4514: 'div' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(161): warning C4514: 'hypot' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(166): warning C4514: 'hypotf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(380): warning C4514: '_chgsignl' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(385): warning C4514: '_copysignl' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(495): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(497): warning C4514: 'pow' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(501): warning C4514: 'acos' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(505): warning C4514: 'atan' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(507): warning C4514: 'atan2' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(509): warning C4514: 'ceil' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(513): warning C4514: 'cosh' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(515): warning C4514: 'exp' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(517): warning C4514: 'fabs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(519): warning C4514: 'floor' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(521): warning C4514: 'fmod' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(523): warning C4514: 'frexp' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(525): warning C4514: 'ldexp' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(527): warning C4514: 'log' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(529): warning C4514: 'log10' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(531): warning C4514: 'modf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(533): warning C4514: 'pow' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(535): warning C4514: 'pow' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(539): warning C4514: 'sinh' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(543): warning C4514: 'tan' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(545): warning C4514: 'tanh' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(547): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(549): warning C4514: 'acos' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(551): warning C4514: 'asin' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(553): warning C4514: 'atan' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(555): warning C4514: 'atan2' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(557): warning C4514: 'ceil' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(559): warning C4514: 'cos' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(561): warning C4514: 'cosh' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(563): warning C4514: 'exp' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(565): warning C4514: 'fabs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(567): warning C4514: 'floor' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(569): warning C4514: 'fmod' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(571): warning C4514: 'frexp' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(573): warning C4514: 'ldexp' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(575): warning C4514: 'log' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(577): warning C4514: 'log10' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(579): warning C4514: 'modf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(581): warning C4514: 'pow' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(583): warning C4514: 'pow' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(585): warning C4514: 'sin' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(587): warning C4514: 'sinh' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(589): warning C4514: 'sqrt' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(591): warning C4514: 'tan' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(593): warning C4514: 'tanh' : unreferenced inline function has been removed
+  ballcuptee.cpp
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(467): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(471): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(475): warning C4514: 'div' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdlib.h(479): warning C4514: 'div' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(36): warning C4514: 'swprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(49): warning C4514: 'vswprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(60): warning C4514: '_swprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(73): warning C4514: '_vswprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(85): warning C4514: 'swprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(97): warning C4514: 'vswprintf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(105): warning C4514: '_swprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\swprintf.inl(117): warning C4514: '_vswprintf_l' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(440): warning C4514: 'getwchar' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(442): warning C4514: 'putwchar' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(161): warning C4514: 'hypot' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(166): warning C4514: 'hypotf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(380): warning C4514: '_chgsignl' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(385): warning C4514: '_copysignl' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(495): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(497): warning C4514: 'pow' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(499): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(501): warning C4514: 'acos' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(503): warning C4514: 'asin' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(505): warning C4514: 'atan' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(507): warning C4514: 'atan2' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(509): warning C4514: 'ceil' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(511): warning C4514: 'cos' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(513): warning C4514: 'cosh' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(515): warning C4514: 'exp' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(517): warning C4514: 'fabs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(519): warning C4514: 'floor' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(521): warning C4514: 'fmod' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(523): warning C4514: 'frexp' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(525): warning C4514: 'ldexp' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(527): warning C4514: 'log' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(529): warning C4514: 'log10' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(531): warning C4514: 'modf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(533): warning C4514: 'pow' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(535): warning C4514: 'pow' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(537): warning C4514: 'sin' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(539): warning C4514: 'sinh' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(543): warning C4514: 'tan' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(545): warning C4514: 'tanh' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(547): warning C4514: 'abs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(549): warning C4514: 'acos' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(551): warning C4514: 'asin' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(553): warning C4514: 'atan' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(555): warning C4514: 'atan2' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(557): warning C4514: 'ceil' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(559): warning C4514: 'cos' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(561): warning C4514: 'cosh' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(563): warning C4514: 'exp' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(565): warning C4514: 'fabs' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(567): warning C4514: 'floor' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(569): warning C4514: 'fmod' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(571): warning C4514: 'frexp' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(573): warning C4514: 'ldexp' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(575): warning C4514: 'log' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(577): warning C4514: 'log10' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(579): warning C4514: 'modf' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(581): warning C4514: 'pow' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(583): warning C4514: 'pow' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(585): warning C4514: 'sin' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(587): warning C4514: 'sinh' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(589): warning C4514: 'sqrt' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(591): warning C4514: 'tan' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\math.h(593): warning C4514: 'tanh' : unreferenced inline function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\GL/glut.h(486): warning C4505: 'glutInit_ATEXIT_HACK' : unreferenced local function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\GL/glut.h(503): warning C4505: 'glutCreateWindow_ATEXIT_HACK' : unreferenced local function has been removed
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\GL/glut.h(549): warning C4505: 'glutCreateMenu_ATEXIT_HACK' : unreferenced local function has been removed
+  Generating Code...
+c:\users\ricky\dev\minigolf\src\ballcuptee.cpp(69): warning C4701: potentially uninitialized local variable 'tile' used
+ManifestResourceCompile:
+  C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"MinigolfTest.dir\Debug\MinigolfTest.exe.embed.manifest.res" MinigolfTest.dir\Debug\MinigolfTest_manifest.rc 
+Link:
+  c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Ricky\Dev\minigolf\vs2010\Debug\MinigolfTest.exe" /INCREMENTAL /NOLOGO /LIBPATH:"C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib" /LIBPATH:"C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib/Debug" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib glu32.lib opengl32.lib "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\lib\glut32.lib" /MANIFEST /ManifestFile:"MinigolfTest.dir\Debug\MinigolfTest.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Ricky\Dev\minigolf\vs2010\Debug\MinigolfTest.pdb" /SUBSYSTEM:CONSOLE /STACK:"10000000" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Ricky/Dev/minigolf/vs2010/Debug/MinigolfTest.lib" /MACHINE:X86 MinigolfTest.dir\Debug\MinigolfTest.exe.embed.manifest.res
+  MinigolfTest.dir\Debug\testmain.obj
+  MinigolfTest.dir\Debug\testlinkedlist.obj
+  MinigolfTest.dir\Debug\testphysics.obj
+  MinigolfTest.dir\Debug\testfileparsing.obj
+  MinigolfTest.dir\Debug\linkedlist.obj
+  MinigolfTest.dir\Debug\physics.obj
+  MinigolfTest.dir\Debug\ballcuptee.obj  /machine:X86 /debug 
+Manifest:
+  C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"MinigolfTest.dir\Debug\MinigolfTest.exe.embed.manifest" /manifest MinigolfTest.dir\Debug\MinigolfTest.exe.intermediate.manifest
+  C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"MinigolfTest.dir\Debug\MinigolfTest.exe.embed.manifest.res" MinigolfTest.dir\Debug\MinigolfTest_manifest.rc 
+LinkEmbedManifest:
+  c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Ricky\Dev\minigolf\vs2010\Debug\MinigolfTest.exe" /INCREMENTAL /NOLOGO /LIBPATH:"C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib" /LIBPATH:"C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib/Debug" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib glu32.lib opengl32.lib "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\lib\glut32.lib" /MANIFEST /ManifestFile:"MinigolfTest.dir\Debug\MinigolfTest.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Ricky\Dev\minigolf\vs2010\Debug\MinigolfTest.pdb" /SUBSYSTEM:CONSOLE /STACK:"10000000" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Ricky/Dev/minigolf/vs2010/Debug/MinigolfTest.lib" /MACHINE:X86 MinigolfTest.dir\Debug\MinigolfTest.exe.embed.manifest.res
+  MinigolfTest.dir\Debug\testmain.obj
+  MinigolfTest.dir\Debug\testlinkedlist.obj
+  MinigolfTest.dir\Debug\testphysics.obj
+  MinigolfTest.dir\Debug\testfileparsing.obj
+  MinigolfTest.dir\Debug\linkedlist.obj
+  MinigolfTest.dir\Debug\physics.obj
+  MinigolfTest.dir\Debug\ballcuptee.obj  /machine:X86 /debug 
+  MinigolfTest.vcxproj -> C:\Users\Ricky\Dev\minigolf\vs2010\Debug\MinigolfTest.exe
+FinalizeBuildStatus:
+  Deleting file "MinigolfTest.dir\Debug\MinigolfTest.unsuccessfulbuild".
+  Touching "MinigolfTest.dir\Debug\MinigolfTest.lastbuildstate".
+Done Building Project "C:\Users\Ricky\Dev\minigolf\vs2010\test\MinigolfTest.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.20
