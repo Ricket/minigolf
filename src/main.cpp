@@ -29,6 +29,9 @@
 #ifdef _WIN32
 #  pragma comment(lib, "Ws2_32.lib")
 #  include <winsock2.h>
+#  include <ctime> /* time(NULL) */
+#  define write(socket, buf, len) ( send((socket), (buf), (len), 0) )
+#  define read(socket, buf, len) ( recv((socket), (buf), (len), 0) )
 #else
 #  include <sys/socket.h>
 #  include <netinet/in.h> /* struct sockaddr_in */
@@ -147,32 +150,34 @@ static void test_socket() {
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
     }
-    bzero((char *) &serv_addr, sizeof(serv_addr));
+	memset(&serv_addr, '\0', sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr, 
-         (char *)&serv_addr.sin_addr.s_addr,
-         server->h_length);
+	memmove((char *)&serv_addr.sin_addr.s_addr, (char *)server->h_addr, server->h_length);
     serv_addr.sin_port = htons(portno);
     if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
         printf("ERROR connecting\n");
         return;
     }
     printf("Please enter the message: ");
-    bzero(buffer,256);
+	memset(buffer, '\0', 256);
     fgets(buffer,255,stdin);
     n = write(sockfd,buffer,strlen(buffer));
     if (n < 0) {
         printf("ERROR writing to socket\n");
         return;
     }
-    bzero(buffer,256);
+	memset(buffer, '\0', 256);
     n = read(sockfd,buffer,255);
     if (n < 0) {
         printf("ERROR reading from socket\n");
         return;
     }
     printf("%s\n",buffer);
+#ifdef _WIN32
+	closesocket(sockfd);
+#else
     close(sockfd);
+#endif
 }
 
 int main(int argc, char** argv) {
