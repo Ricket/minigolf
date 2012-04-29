@@ -26,12 +26,19 @@
 #  include <GL/glut.h>
 #endif
 
+#ifdef _WIN32
+#  include <winsock.h>
+#else
+#  include <sys/socket.h>
+#endif
+
 #include "data.h"
 #include "ballcuptee.h"
 #include "physics.h"
 #include "player.h"
 #include "scorecard.h"
 #include "about.h"
+#include "hostgame.h"
 #include "highscores.h"
 #include "object.h"
 
@@ -82,18 +89,18 @@ enum gamestate {
 };
 
 static int windowId;
-static GLUI *glui, *gluiNewGame;
+static GLUI *glui = NULL, *gluiNewGame = NULL;
 static std::string newFilename;
 static int newPlayerEnabled[4];
 static std::string newPlayerNames[4];
 
-static char *filename;
+static char *filename = NULL;
 static struct player *players[4];
 static int currentPlayer;
-static GLUI_StaticText *gluiCurrentPlayer;
-static GLUI_StaticText *gluiPar;
-static struct scorecard *scorecard;
-static GLUI *gluiScorecard;
+static GLUI_StaticText *gluiCurrentPlayer = NULL;
+static GLUI_StaticText *gluiPar = NULL;
+static struct scorecard *scorecard = NULL;
+static GLUI *gluiScorecard = NULL;
 static char parText[9];
 
 #define GLUI_NEW_GAME 12345
@@ -102,16 +109,17 @@ static char parText[9];
 #define GLUI_HIGHSCORES 848484
 #define GLUI_QUIT 17734
 #define GLUI_ABOUT 17735
+#define GLUI_HOSTGAME 17736
 #define GLUI_INPUTFILE 234
 
 #define SIZE_PLAYERNAME 50
 #define SIZE_FILENAME 100
 
-static struct course *course;
-static struct hole *hole;
-static int hole_num;
+static struct course *course = NULL;
+static struct hole *hole = NULL;
+static int hole_num = 0;
 static struct listnode *hole_node;
-static float timeOnHole;
+static float timeOnHole = 0;
 static enum gamestate gameState = GAMESTATE_BALLDIRECTION;
 
 static float cameraDist = 7.0f;
@@ -159,6 +167,7 @@ int main(int argc, char** argv) {
 
 	/* new game and quit buttons */
 	glui->add_button("New game", GLUI_NEW_GAME, &gluiQuick);
+	glui->add_button("Host network game", GLUI_HOSTGAME, &gluiQuick);
 	glui->add_button("High scores", GLUI_HIGHSCORES, &gluiQuick);
 	glui->add_button("Quit", GLUI_QUIT, &gluiQuick);
 	glui->add_button("About", GLUI_ABOUT, &gluiQuick);
@@ -279,10 +288,9 @@ static void reload_course() {
 	int i;
 	struct listnode *node;
 
-	if(course != NULL) {
-		free_course(course);
-		course = NULL;
-	}
+	/* if course exists, free it */
+	free_course(course);
+	course = NULL;
 
 	if(strlen(filename) > 0) {
 		course = load_course(filename);
@@ -921,6 +929,8 @@ static void gluiQuick(int code) {
 		exit(0);
 	} else if(code == GLUI_ABOUT) {
 		show_about_dialog();
+	} else if(code == GLUI_HOSTGAME) {
+		show_hostgame_dialog();
 	} else if(code == GLUI_HIGHSCORES) {
 		show_highscores();
 	}

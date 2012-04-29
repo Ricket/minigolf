@@ -11,6 +11,7 @@ SET(Minigolf_SOURCE_FILES
 	physics.cpp
 	scorecard.cpp
 	about.cpp
+	hostgame.cpp
 	highscores.cpp
 	object.cpp
 	)

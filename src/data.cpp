@@ -614,7 +614,6 @@ struct course * load_course(char *filename) {
 
 void free_course(struct course *course) {
 	if(course == NULL) {
-		printf("Warning: free_course called with null course");
 		return;
 	}
 
