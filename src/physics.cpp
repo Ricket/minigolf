@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include <float.h>
 
 #include "data.h"
 #include "object.h"
@@ -257,9 +258,11 @@ void transfer_ball(struct ball *ball, int edge) {
 	assert(ball->tile->neighbors[edge].id != 0);
 	assert(ball->tile != ball->tile->neighbors[edge].tile);
 	
+	/* p0 to p1 make up the edge the ball is transferring across */
 	p0 = &(ball->tile->vertices[edge]);
 	p1 = &(ball->tile->vertices[(edge+1) % ball->tile->num_edges]);
 	
+	/* u is the vector along the edge */
 	u[0] = p1->x - p0->x;
 	u[1] = p1->y - p0->y;
 	u[2] = p1->z - p0->z;
@@ -314,6 +317,37 @@ void transfer_ball(struct ball *ball, int edge) {
 	ball->tile_id = tile1->id;
 }
 
+static void move_ball_slightly_towards_center(struct ball *ball) {
+	/* shift the ball slightly towards the centroid of its current tile */
+
+	int dimension;
+
+	dimension = rand() % 2;
+
+	if(dimension == 0 /* X */) {
+		if(ball->x > ball->tile->centroid_x) {
+			ball->x -= FLT_EPSILON;
+		} else {
+			ball->x += FLT_EPSILON;
+		}
+	} else {
+		if(ball->z > ball->tile->centroid_z) {
+			ball->z -= FLT_EPSILON;
+		} else {
+			ball->z += FLT_EPSILON;
+		}
+	}
+}
+
+void clamp_ball(struct ball *ball) {
+	/* snap the ball into the closest point in its current tile */
+
+	/* yay easy brute force method */
+	while(!ball_in_tile(ball)) {
+		move_ball_slightly_towards_center(ball);
+	}
+}
+
 void apply_gravity_tick(struct ball *ball) {
 	float gx,gy,gz;
 	float balldy;
@@ -342,10 +376,10 @@ void apply_gravity_tick(struct ball *ball) {
 }
 
 void physics_test_static_functions() {
-	assert( abs(distance_sq(0,0,0,1,1,1) - 3.0f) < 0.0001f );
-	assert( abs(distance_sq(0,1,2,3,4,5) - 27.0f) < 0.0001f );
+	assert( fabs(distance_sq(0,0,0,1,1,1) - 3.0f) < 0.0001f );
+	assert( fabs(distance_sq(0,1,2,3,4,5) - 27.0f) < 0.0001f );
 	
-	assert( abs(dot(0,0,0,9,18,27) - 0.0f) < 0.0001f );
-	assert( abs(dot(0,1,2,3,4,5) - 14.0f) < 0.0001f );
-	assert( abs(dot(2,3,4,5,6,7) - 56.0f) < 0.0001f );
+	assert( fabs(dot(0,0,0,9,18,27) - 0.0f) < 0.0001f );
+	assert( fabs(dot(0,1,2,3,4,5) - 14.0f) < 0.0001f );
+	assert( fabs(dot(2,3,4,5,6,7) - 56.0f) < 0.0001f );
 }

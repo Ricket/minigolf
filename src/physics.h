@@ -24,6 +24,7 @@ int ball_crosses_obj(struct ball *, float, float, float, struct object *);
 void bounce_ball(struct ball *, int);
 void bounce_ball_bbox(struct ball *, struct boundingbox *, int);
 void transfer_ball(struct ball *, int);
+void clamp_ball(struct ball *);
 
 void apply_gravity_tick(struct ball *);
 
