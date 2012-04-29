@@ -26,10 +26,10 @@
 #  include <GL/glut.h>
 #endif
 
+/* socket stuff */
 #ifdef _WIN32
 #  pragma comment(lib, "Ws2_32.lib")
 #  include <winsock2.h>
-#  include <ctime> /* time(NULL) */
 #  define write(socket, buf, len) ( send((socket), (buf), (len), 0) )
 #  define read(socket, buf, len) ( recv((socket), (buf), (len), 0) )
 #  define close(socket) ( closesocket(socket) )
@@ -37,6 +37,10 @@
 #  include <sys/socket.h>
 #  include <netinet/in.h> /* struct sockaddr_in */
 #  include <netdb.h> /* gethostbyname() */
+#endif
+
+#ifdef _WIN32
+#  include <ctime> /* time(NULL) */
 #endif
 
 #include "data.h"
