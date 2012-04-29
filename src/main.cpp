@@ -27,7 +27,8 @@
 #endif
 
 #ifdef _WIN32
-#  include <winsock.h>
+#  pragma comment(lib, "Ws2_32.lib")
+#  include <winsock2.h>
 #else
 #  include <sys/socket.h>
 #  include <netinet/in.h> /* struct sockaddr_in */
