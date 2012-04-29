@@ -32,6 +32,7 @@
 #  include <ctime> /* time(NULL) */
 #  define write(socket, buf, len) ( send((socket), (buf), (len), 0) )
 #  define read(socket, buf, len) ( recv((socket), (buf), (len), 0) )
+#  define close(socket) ( closesocket(socket) )
 #else
 #  include <sys/socket.h>
 #  include <netinet/in.h> /* struct sockaddr_in */
@@ -173,11 +174,7 @@ static void test_socket() {
         return;
     }
     printf("%s\n",buffer);
-#ifdef _WIN32
-	closesocket(sockfd);
-#else
     close(sockfd);
-#endif
 }
 
 int main(int argc, char** argv) {
