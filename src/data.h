@@ -117,6 +117,7 @@ struct tile {
 	float **edgeRotMat; /* array of matrices of rotation around the edges */
 
 	float norm_x, norm_y, norm_z;
+	float centroid_x, centroid_y, centroid_z;
 	
 	/* Note matrices use mathematical matrix indexing; that is, mat[1][2] is
 	   the element in the second row, third column. */

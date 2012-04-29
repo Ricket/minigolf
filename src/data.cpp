@@ -51,6 +51,20 @@ static void calculate_normal(struct tile *tile) {
 	}
 }
 
+static void calculate_centroid(struct tile *tile) {
+	int i;
+
+	tile->centroid_x = 0;
+	tile->centroid_y = 0;
+	tile->centroid_z = 0;
+
+	for(i = 0; i < tile->num_edges; i++) {
+		tile->centroid_x += tile->vertices[i].x / (float)tile->num_edges;
+		tile->centroid_y += tile->vertices[i].y / (float)tile->num_edges;
+		tile->centroid_z += tile->vertices[i].z / (float)tile->num_edges;
+	}
+}
+
 static void calculate_matrices(struct tile *tile) {
 	float cosArrowSpinSpeed = cos(ARROW_SPIN_SPEED), sinArrowSpinSpeed = sin(ARROW_SPIN_SPEED);
 	float u[3], umag, theta, cosTheta, sinTheta;
@@ -401,6 +415,7 @@ struct course * load_course(char *filename) {
 				}
 				
 				calculate_normal(tile);
+				calculate_centroid(tile);
 				calculate_matrices(tile);
 				
 				ll_push_back(hole->tiles, tile);
