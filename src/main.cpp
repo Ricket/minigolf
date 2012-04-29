@@ -30,6 +30,8 @@
 #  include <winsock.h>
 #else
 #  include <sys/socket.h>
+#  include <netinet/in.h> /* struct sockaddr_in */
+#  include <netdb.h> /* gethostbyname() */
 #endif
 
 #include "data.h"
@@ -128,8 +130,54 @@ static float cameraPosX = 0.0f, cameraPosY = 0.0f, cameraPosZ = 0.0f;
 static void setup_camera(void);
 static void render_tile(struct tile *t);
 
+static void test_socket() {
+	int sockfd, portno, n;
+    struct sockaddr_in serv_addr;
+    struct hostent *server;
+
+    char buffer[256];
+    portno = 1234;
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        printf("ERROR opening socket\n");
+        return;
+    }
+    server = gethostbyname("localhost");
+    if (server == NULL) {
+        fprintf(stderr,"ERROR, no such host\n");
+    }
+    bzero((char *) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    bcopy((char *)server->h_addr, 
+         (char *)&serv_addr.sin_addr.s_addr,
+         server->h_length);
+    serv_addr.sin_port = htons(portno);
+    if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
+        printf("ERROR connecting\n");
+        return;
+    }
+    printf("Please enter the message: ");
+    bzero(buffer,256);
+    fgets(buffer,255,stdin);
+    n = write(sockfd,buffer,strlen(buffer));
+    if (n < 0) {
+        printf("ERROR writing to socket\n");
+        return;
+    }
+    bzero(buffer,256);
+    n = read(sockfd,buffer,255);
+    if (n < 0) {
+        printf("ERROR reading from socket\n");
+        return;
+    }
+    printf("%s\n",buffer);
+    close(sockfd);
+}
+
 int main(int argc, char** argv) {
 	int i,j;
+
+	test_socket();
 
 	srand(time(NULL));
 
