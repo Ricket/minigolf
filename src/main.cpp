@@ -123,6 +123,8 @@ static void render_tile(struct tile *t);
 int main(int argc, char** argv) {
 	int i,j;
 
+	srand(time(NULL));
+
 	glutInit(&argc, argv);
 	
 	if(argc < 2) {
@@ -378,6 +380,7 @@ static void update_logic() {
 	int currentTime = glutGet(GLUT_ELAPSED_TIME);
 	bool shouldRender = false;
 	float newv[2];
+	int originalTile;
 	int closestEdge;
 	struct listnode *node;
 	float dist, dotprod, mag;
@@ -437,6 +440,8 @@ static void update_logic() {
 					node = node->next;
 				}
 
+				originalTile = ball->tile_id;
+
 				/* if ball exits current tile, bounce or switch tiles */
 				while(!ball_in_tile(ball)) {
 					/* reflect or switch tiles */
@@ -445,9 +450,20 @@ static void update_logic() {
 					if(ball->tile->neighbors[closestEdge].id == 0) {
 						/* printf("*bounce*\n"); */
 						bounce_ball(ball, closestEdge);
-					} else {
-						/* printf("*cross into new tile*\n"); */
+
+						if(!ball_in_tile(ball) && get_closest_edge(ball) == closestEdge) {
+							/* printf("*would bounce again infinitely, instead clamping*\n"); */
+							clamp_ball(ball);
+						}
+
+					} else if(ball->tile->neighbors[closestEdge].id != originalTile) {
+						/* printf("*cross into new tile %d*\n", ball->tile->neighbors[closestEdge].id); */
 						transfer_ball(ball, closestEdge);
+					} else {
+						/* already transferred the ball, but it's still outside its new tile;
+						   clamp it */
+						/* printf("*clamp ball into new tile %d*\n", ball->tile->neighbors[closestEdge].id); */
+						clamp_ball(ball);
 					}
 				}
 				
