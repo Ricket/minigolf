@@ -402,7 +402,7 @@ static void update_network() {
 	/* called by update_logic() to receive network updates */
 
 	fd_set readFDs, exceptFDs;
-	int i;
+	int i, nfds = -1;
 
 	FD_ZERO(&readFDs);FD_ZERO(&exceptFDs);
 
@@ -410,18 +410,27 @@ static void update_network() {
 	if(network_mode == NM_SERVER) {
 		FD_SET(sockfd_server, &readFDs);
 		FD_SET(sockfd_server, &exceptFDs);
+		if(sockfd_server >= nfds) {
+			nfds = sockfd_server + 1;
+		}
 		for(i=0; i<3; i++) {
 			if(sockfd_clients[i] > -1) {
 				FD_SET(sockfd_clients[i], &readFDs);
 				FD_SET(sockfd_clients[i], &exceptFDs);
+				if(sockfd_clients[i] >= nfds) {
+					nfds = sockfd_clients[i] + 1;
+				}
 			}
 		}
 	} else if(network_mode == NM_CLIENT) {
 		FD_SET(sockfd_client, &readFDs);
 		FD_SET(sockfd_client, &exceptFDs);
+		nfds = sockfd_client + 1;
 	}
 
+	if(select(nfds, &readFDs, NULL, &exceptFDs, 0) > 0) {
 
+	}
 }
 
 static void update_logic() {
