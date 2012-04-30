@@ -184,7 +184,7 @@ static void button_hostgame(int code) {
 
 		for(i=0; i<3; i++) {
 			sockfd_clients[i] = -1;
-			sock_client_buf[i] = (char*)malloc(SOCK_CLIENT_BUF_SIZE);
+			sock_client_buf[i] = NULL;
 			sock_client_buf_pending[i] = 0;
 		}
 

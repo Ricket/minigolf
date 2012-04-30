@@ -427,6 +427,8 @@ static void accept_new_connection() {
 			return;
 		} else {
 			sockfd_clients[clientid] = newsocket;
+			sock_client_buf_pending[clientid] = 0;
+			sock_client_buf[clientid] = (char*)malloc(SOCK_CLIENT_BUF_SIZE);
 			/* initialize players[clientid+1] */
 		}
 
@@ -479,6 +481,12 @@ static void read_client_data(int id) {
 	if(sock_client_buf_pending[id] > (int)sizeof(unsigned short)) {
 		packet_bytes = ((unsigned short *)sock_client_buf)[0];
 		packet_bytes = ntohs(packet_bytes); /* fix network byte order */
+
+		if(packet_bytes == 0) {
+			/* invalid */
+			close(sockfd_clients[id]);
+			sockfd_clients[id] = -1;
+		}
 	}
 }
 
