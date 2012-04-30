@@ -443,6 +443,7 @@ static void read_client_data(int id) {
 #ifdef _WIN32
 	int err, errlen;
 #endif
+	unsigned short packet_bytes;
 
 	nbytes = socketread(sockfd_clients[id], &(sock_client_buf[id][sock_client_buf_pending[id]]), SOCK_CLIENT_BUF_SIZE - sock_client_buf_pending[id]);
 	if(nbytes > 0) {
@@ -472,6 +473,12 @@ static void read_client_data(int id) {
 #ifdef _WIN32
 		}
 #endif
+	}
+
+	/* if we reach this point, we got some data */
+	if(sock_client_buf_pending[id] > (int)sizeof(unsigned short)) {
+		packet_bytes = ((unsigned short *)sock_client_buf)[0];
+		packet_bytes = ntohs(packet_bytes); /* fix network byte order */
 	}
 }
 
