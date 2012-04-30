@@ -1,7 +1,6 @@
-CSC 462 Assignment 4: External Objects
+CSC 462 Course Project (Minigolf)
 Richard Carter
-2012/04/08
-************ NOTE TO SELF: SEARCH FOR TODOS, DO THEM ******************************
+2012/04/29
 
 == System Requirements
 Windows:
@@ -60,6 +59,3 @@ The current player and par is displayed on the right sidebar.
 At the end of every hole, the scorecard will appear. At the end of a course,
 the highscores will appear and entries will have been added for any players
 who achieved a new high score. Up to 10 high scores are stored at once.
-
-== Known bugs/shortcomings
-Only static object transformations are supported.
