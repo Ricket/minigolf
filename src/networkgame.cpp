@@ -31,7 +31,7 @@ int network_mode = NM_LOCAL;
 int sockfd_server = -1;
 struct sockaddr_in serv_addr;
 int sockfd_clients[3];
-void *sock_client_buf[3] = {NULL, NULL, NULL};
+char *sock_client_buf[3] = {NULL, NULL, NULL};
 int sock_client_buf_pending[3];
 
 int sockfd_client = -1;
@@ -184,7 +184,7 @@ static void button_hostgame(int code) {
 
 		for(i=0; i<3; i++) {
 			sockfd_clients[i] = -1;
-			sock_client_buf[i] = malloc(SOCK_CLIENT_BUF_SIZE);
+			sock_client_buf[i] = (char*)malloc(SOCK_CLIENT_BUF_SIZE);
 			sock_client_buf_pending[i] = 0;
 		}
 
