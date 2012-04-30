@@ -408,9 +408,8 @@ static void accept_new_connection() {
 	int nAddrSize = sizeof(serv_addr);
 #ifdef _WIN32
 	u_long noBlock = 1;
-#else
-	int flag = 1;
 #endif
+	int flag = 1;
 
 	newsocket = accept(sockfd_server, (struct sockaddr *)&serv_addr, 
 #ifdef _WIN32
