@@ -31,6 +31,9 @@ int network_mode = NM_LOCAL;
 int sockfd_server = -1;
 struct sockaddr_in serv_addr;
 int sockfd_clients[3];
+void *sock_client_buf[3] = {NULL, NULL, NULL};
+int sock_client_buf_pending[3];
+
 int sockfd_client = -1;
 
 /* host */
@@ -111,7 +114,7 @@ static void text_hostgame(int code) {
 }
 
 static void button_hostgame(int code) {
-	int portnum;
+	int i, portnum;
 #ifdef _WIN32
 	WSADATA wsaData = {0};
 	int rsaResult = 0;
@@ -124,7 +127,14 @@ static void button_hostgame(int code) {
 		if(sockfd_server >= 0) {
 			socketclose(sockfd_server);
 			sockfd_server = -1;
-			sockfd_clients[0] = sockfd_clients[1] = sockfd_clients[2] = -1;
+			for(i=0; i<3; i++) {
+				sockfd_clients[i] = -1;
+				if(sock_client_buf[i] != NULL) {
+					free(sock_client_buf[i]);
+					sock_client_buf[i] = NULL;
+				}
+				sock_client_buf_pending[i] = 0;
+			}
 #ifdef _WIN32
 			WSACleanup();
 #endif
@@ -157,13 +167,26 @@ static void button_hostgame(int code) {
 			/* TODO handle error */
 			socketclose(sockfd_server);
 			sockfd_server = -1;
-			sockfd_clients[0] = sockfd_clients[1] = sockfd_clients[2] = -1;
+			for(i=0; i<3; i++) {
+				sockfd_clients[i] = -1;
+				if(sock_client_buf[i] != NULL) {
+					free(sock_client_buf[i]);
+					sock_client_buf[i] = NULL;
+				}
+				sock_client_buf_pending[i] = 0;
+			}
 #ifdef _WIN32
 			WSACleanup();
 #endif
 			return;
 		}
 		listen(sockfd_server, 4);
+
+		for(i=0; i<3; i++) {
+			sockfd_clients[i] = -1;
+			sock_client_buf[i] = malloc(SOCK_CLIENT_BUF_SIZE);
+			sock_client_buf_pending[i] = 0;
+		}
 
 		network_mode = NM_SERVER;
 

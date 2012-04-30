@@ -437,6 +437,44 @@ static void accept_new_connection() {
 	}
 }
 
+static void read_client_data(int id) {
+	/* socketread */
+	int nbytes;
+#ifdef _WIN32
+	int err, errlen;
+#endif
+
+	nbytes = socketread(sockfd_clients[id], &(sock_client_buf[id][sock_client_buf_pending[id]]), SOCK_CLIENT_BUF_SIZE - sock_client_buf_pending[id]);
+	if(nbytes > 0) {
+		sock_client_buf_pending[id] += nbytes;
+	}
+
+	/* handle close case */
+	if(nbytes == 0) {
+		printf("Socket %d closed connection gracefully\n", id);
+		sockfd_clients[id] = -1;
+		sock_client_buf_pending[id] = 0;
+		return;
+	}
+	
+	/* handle error */
+	if(nbytes < 0) {
+#ifdef _WIN32
+		/* on windows, WSAEWOULDBLOCK error should be ignored */
+		errlen = sizeof(err)
+		getsockopt(sockfd_clients[id], SOL_SOCKET, SO_ERROR, (char*)&err, &errlen);
+		if(err != WSAEWOULDBLOCK) {
+#endif
+			printf("Error on socket %d\n", id);
+			sockfd_clients[id] = -1;
+			sock_client_buf_pending[id] = 0;
+			return;
+#ifdef _WIN32
+		}
+#endif
+	}
+}
+
 static void update_network() {
 	/* called by update_logic() to receive network updates */
 
@@ -472,11 +510,41 @@ static void update_network() {
 
 	if(select(nfds, &readFDs, NULL, &exceptFDs, &tv_returnimmediately) > 0) {
 		if(network_mode == NM_SERVER) {
+			/* if server can read, accept a new connection */
 			if(FD_ISSET(sockfd_server, &readFDs)) {
 				accept_new_connection();
 			}
-		} else if(network_mode == NM_CLIENT) {
+			
+			/* if server has exception, just print a message */
+			else if(FD_ISSET(sockfd_server, &exceptFDs)) {
+				printf("Exception on listening socket\n");
+			}
 
+			for(i=0; i<3; i++) {
+
+				if(FD_ISSET(sockfd_clients[i], &readFDs)) {
+					read_client_data(i);
+				}
+
+				else if(FD_ISSET(sockfd_clients[i], &exceptFDs)) {
+					printf("Exception on client %d, closing socket\n", i);
+					socketclose(sockfd_clients[i]);
+					/* TODO end game */
+				}
+
+			}
+		} else if(network_mode == NM_CLIENT) {
+			if(FD_ISSET(sockfd_client, &readFDs)) {
+				/* read some data from server */
+				printf("read some data from server\n");
+			}
+
+			else if(FD_ISSET(sockfd_client, &exceptFDs)) {
+				printf("Exception reading from server, closing socket\n");
+				socketclose(sockfd_client);
+				sockfd_client = -1;
+				/* TODO end game */
+			}
 		}
 	}
 }

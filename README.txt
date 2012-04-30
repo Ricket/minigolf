@@ -1,7 +1,7 @@
 CSC 462 Assignment 4: External Objects
 Richard Carter
 2012/04/08
-
+************ NOTE TO SELF: SEARCH FOR TODOS, DO THEM ******************************
 
 == System Requirements
 Windows:
