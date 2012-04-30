@@ -30,6 +30,7 @@
 #ifdef _WIN32
 #  pragma comment(lib, "Ws2_32.lib")
 #  include <winsock2.h>
+#  include <WS2tcpip.h>
 #  define socketwrite(socket, buf, len) ( send((socket), (buf), (len), 0) )
 #  define socketread(socket, buf, len) ( recv((socket), (buf), (len), 0) )
 #  define socketclose(socket) ( closesocket(socket) )

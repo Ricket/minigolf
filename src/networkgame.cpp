@@ -15,6 +15,7 @@
 #ifdef _WIN32
 #  pragma comment(lib, "Ws2_32.lib")
 #  include <winsock2.h>
+#  include <WS2tcpip.h>
 #  define socketwrite(socket, buf, len) ( send((socket), (buf), (len), 0) )
 #  define socketread(socket, buf, len) ( recv((socket), (buf), (len), 0) )
 #  define socketclose(socket) ( closesocket(socket) )
@@ -213,7 +214,7 @@ void show_joingame_dialog() {
 
 	joingameDialog = GLUI_Master.create_glui("Join Game");
 
-	serverHostName = std::string("localhost");
+	serverHostName = std::string("127.0.0.1");
 	gluiServerHostName = new GLUI_EditText(joingameDialog, "Host addr:", serverHostName, GH_SERVER_ADDR, &text_joingame);
 	
 	serverPort = std::string("");
@@ -229,6 +230,10 @@ static void button_joingame(int code) {
 	struct addrinfo *serverAddrInfo;
 	int i;
 	char buffer[100];
+#ifdef _WIN32
+	WSADATA wsaData = {0};
+	int rsaResult = 0;
+#endif
 
 	gluiServerHostName->disable();
 	gluiServerPort->disable();
