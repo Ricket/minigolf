@@ -398,9 +398,34 @@ static void next_hole() {
 	}
 }
 
+static void update_network() {
+	/* called by update_logic() to receive network updates */
+
+	fd_set readFDs, exceptFDs;
+	int i;
+
+	FD_ZERO(&readFDs);FD_ZERO(&exceptFDs);
+
+	/* set up file descriptor sets */
+	if(network_mode == NM_SERVER) {
+		FD_SET(sockfd_server, &readFDs);
+		FD_SET(sockfd_server, &exceptFDs);
+		for(i=0; i<3; i++) {
+			if(sockfd_clients[i] > -1) {
+				FD_SET(sockfd_clients[i], &readFDs);
+				FD_SET(sockfd_clients[i], &exceptFDs);
+			}
+		}
+	} else if(network_mode == NM_CLIENT) {
+		FD_SET(sockfd_client, &readFDs);
+		FD_SET(sockfd_client, &exceptFDs);
+	}
+
+
+}
+
 static void update_logic() {
 	int currentTime = glutGet(GLUT_ELAPSED_TIME);
-	bool shouldRender = false;
 	float newv[2];
 	int originalTile;
 	int closestEdge;
@@ -411,12 +436,13 @@ static void update_logic() {
 	struct ball *ball;
 	float bally;
 
+	if(network_mode == NM_SERVER || network_mode == NM_CLIENT) {
+		update_network();
+	}
+
 	pendingDelta += currentTime - lastUpdate;
 	
 	lastUpdate = currentTime;
-	if(pendingDelta > 16) {
-		shouldRender = true;
-	}
 	
 	while(pendingDelta > 16) {
 		/* TICK */
@@ -542,10 +568,8 @@ static void update_logic() {
 		pendingDelta -= 16;
 	}
 	
-	if(shouldRender) {
-		glutSetWindow(windowId);
-		glutPostRedisplay();
-	}
+	glutSetWindow(windowId);
+	glutPostRedisplay();
 }
 
 static void reshape(int w, int h) {

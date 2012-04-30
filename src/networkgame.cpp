@@ -28,7 +28,9 @@
 #endif
 
 int network_mode = NM_LOCAL;
-int sockfd = -1;
+int sockfd_server = -1;
+int sockfd_clients[3];
+int sockfd_client = -1;
 
 /* host */
 static GLUI *hostgameDialog = NULL;
@@ -119,9 +121,10 @@ static void button_hostgame(int code) {
 		hostgameDialog->close();
 		hostgameDialog = NULL;
 
-		if(sockfd >= 0) {
-			socketclose(sockfd);
-			sockfd = -1;
+		if(sockfd_server >= 0) {
+			socketclose(sockfd_server);
+			sockfd_server = -1;
+			sockfd_clients[0] = sockfd_clients[1] = sockfd_clients[2] = -1;
 #ifdef _WIN32
 			WSACleanup();
 #endif
@@ -138,8 +141,8 @@ static void button_hostgame(int code) {
 		}
 #endif
 
-		sockfd = socket(AF_INET, SOCK_STREAM, 0);
-		if(sockfd < 0) {
+		sockfd_server = socket(AF_INET, SOCK_STREAM, 0);
+		if(sockfd_server < 0) {
 			printf("Error opening socket\n");
 			/* TODO handle error */
 			return;
@@ -149,17 +152,18 @@ static void button_hostgame(int code) {
 		serv_addr.sin_family = AF_INET;
 		serv_addr.sin_addr.s_addr = INADDR_ANY;
 		serv_addr.sin_port = htons(portnum);
-		if(bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr_in)) < 0) {
+		if(bind(sockfd_server, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr_in)) < 0) {
 			printf("Error binding socket\n");
 			/* TODO handle error */
-			socketclose(sockfd);
-			sockfd = -1;
+			socketclose(sockfd_server);
+			sockfd_server = -1;
+			sockfd_clients[0] = sockfd_clients[1] = sockfd_clients[2] = -1;
 #ifdef _WIN32
 			WSACleanup();
 #endif
 			return;
 		}
-		listen(sockfd, 5);
+		listen(sockfd_server, 4);
 
 		network_mode = NM_SERVER;
 
