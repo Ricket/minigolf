@@ -35,6 +35,8 @@ char *sock_client_buf[3] = {NULL, NULL, NULL};
 int sock_client_buf_pending[3];
 
 int sockfd_client = -1;
+char *sock_server_buf = NULL;
+int sock_server_buf_pending = 0;
 
 /* host */
 static GLUI *hostgameDialog = NULL;
@@ -49,12 +51,19 @@ static GLUI_Button *hostBtnStartListening = NULL, *hostBtnStartGame = NULL, *hos
 #define GH_STARTGAME 11
 #define GH_CANCEL 12
 
-/* join */
-static GLUI *joingameDialog = NULL;
-
 static void text_hostgame(int);
 static void button_hostgame(int);
-static void close_joingame(int);
+
+/* join */
+static GLUI *joingameDialog = NULL;
+static GLUI_EditText *gluiServerHostName = NULL, *gluiServerPort = NULL;
+static std::string serverHostName, serverPort;
+
+#define GH_SERVER_ADDR 120
+#define GH_SERVER_PORT 121
+
+static void text_joingame(int);
+static void button_joingame(int);
 
 void show_hostgame_dialog() {
 	GLUI_Panel *panel;
@@ -154,7 +163,9 @@ static void button_hostgame(int code) {
 		sockfd_server = socket(AF_INET, SOCK_STREAM, 0);
 		if(sockfd_server < 0) {
 			printf("Error opening socket\n");
-			/* TODO handle error */
+#ifdef _WIN32
+			WSACleanup();
+#endif
 			return;
 		}
 		memset(&serv_addr, '\0', sizeof(struct sockaddr_in));
@@ -201,11 +212,79 @@ void show_joingame_dialog() {
 	}
 
 	joingameDialog = GLUI_Master.create_glui("Join Game");
-	/* add stuff here */
-	joingameDialog->add_button("OK", 0, &close_joingame);
+
+	serverHostName = std::string("localhost");
+	gluiServerHostName = new GLUI_EditText(joingameDialog, "Host addr:", serverHostName, GH_SERVER_ADDR, &text_joingame);
+	
+	serverPort = std::string("");
+	gluiServerPort = new GLUI_EditText(joingameDialog, "Port:", serverPort, GH_SERVER_PORT, &text_joingame);
+	
+	joingameDialog->add_button("Join", 0, &button_joingame);
 }
 
-static void close_joingame(int code) {
+static void text_joingame(int code) {
+}
+
+static void button_joingame(int code) {
+	struct addrinfo *serverAddrInfo;
+	int i;
+	char buffer[100];
+
+	gluiServerHostName->disable();
+	gluiServerPort->disable();
+
+#ifdef _WIN32
+		if((rsaResult = WSAStartup(MAKEWORD(2, 2), &wsaData)) != 0) {
+			printf("WSAStartup failed: %d\n", rsaResult);
+			return;
+		}
+#endif
+
+	sockfd_client = socket(AF_INET, SOCK_STREAM, 0);
+	if(sockfd_client < 0) {
+		printf("Error opening socket\n");
+#ifdef _WIN32
+		WSACleanup();
+#endif
+		return;
+	}
+
+	/* get host from name */
+	if(getaddrinfo(serverHostName.c_str(), serverPort.c_str(), NULL, &serverAddrInfo) != 0) {
+		printf("Error in getaddrinfo\n");
+		sockfd_client = -1;
+#ifdef _WIN32
+		WSACleanup();
+#endif
+		return;
+	}
+
+	memcpy(&serv_addr, serverAddrInfo->ai_addr, sizeof(serv_addr));
+
+	if(connect(sockfd_client, serverAddrInfo->ai_addr, sizeof(serv_addr)) < 0) {
+		printf("Error connecting to server\n");
+		sockfd_client = -1;
+#ifdef _WIN32
+		WSACleanup();
+#endif
+		return;
+	}
+
+	i = 0;
+	((unsigned short *)buffer)[0] = htons((unsigned short)sizeof(char));
+	i += sizeof(unsigned short);
+	buffer[i] = 50;
+	i += sizeof(char);
+
+	socketwrite(sockfd_client, buffer, i);
+
+	if(sock_server_buf == NULL) {
+		sock_server_buf = (char*)malloc(SOCK_CLIENT_BUF_SIZE);
+	}
+	sock_server_buf_pending = 0;
+
+	network_mode = NM_CLIENT;
+
 	joingameDialog->close();
 	joingameDialog = NULL;
 }

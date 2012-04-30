@@ -124,6 +124,7 @@ static char parText[9];
 #define GLUI_QUIT 17734
 #define GLUI_ABOUT 17735
 #define GLUI_HOSTGAME 17736
+#define GLUI_JOINGAME 17737
 #define GLUI_INPUTFILE 234
 
 #define SIZE_PLAYERNAME 50
@@ -182,6 +183,7 @@ int main(int argc, char** argv) {
 	/* new game and quit buttons */
 	glui->add_button("New game", GLUI_NEW_GAME, &gluiQuick);
 	glui->add_button("Host network game", GLUI_HOSTGAME, &gluiQuick);
+	glui->add_button("Join network game", GLUI_JOINGAME, &gluiQuick);
 	glui->add_button("High scores", GLUI_HIGHSCORES, &gluiQuick);
 	glui->add_button("Quit", GLUI_QUIT, &gluiQuick);
 	glui->add_button("About", GLUI_ABOUT, &gluiQuick);
@@ -440,7 +442,19 @@ static void accept_new_connection() {
 }
 
 static void decode_client_packet(int id, char *packet, int len) {
+	char buffer[100];
+	int i;
+
 	printf("Got packet ID %d\n", (int)packet[0]);
+
+	/* send test packet 50 back */
+	i = 0;
+	((unsigned short *)buffer)[0] = htons((unsigned short)sizeof(char));
+	i += sizeof(unsigned short);
+	buffer[i] = 50;
+	i += sizeof(char);
+
+	socketwrite(sockfd_clients[id], buffer, i);
 }
 
 static void read_client_data(int id) {
@@ -503,6 +517,70 @@ static void read_client_data(int id) {
 	}
 }
 
+static void decode_server_packet(char *packet, int len) {
+	printf("Got packet ID %d\n", (int)packet[0]);
+}
+
+static void read_server_data() {
+	/* socketread */
+	int nbytes;
+#ifdef _WIN32
+	int err, errlen;
+#endif
+	unsigned short packet_bytes;
+
+	nbytes = socketread(sockfd_client, &(sock_server_buf[sock_server_buf_pending]), SOCK_CLIENT_BUF_SIZE - sock_server_buf_pending);
+	if(nbytes > 0) {
+		sock_server_buf_pending += nbytes;
+	}
+
+	/* handle close case */
+	if(nbytes == 0) {
+		printf("Server closed connection gracefully\n");
+		sockfd_client = -1;
+		sock_server_buf_pending = 0;
+		return;
+	}
+	
+	/* handle error */
+	if(nbytes < 0) {
+#ifdef _WIN32
+		/* on windows, WSAEWOULDBLOCK error should be ignored */
+		errlen = sizeof(err);
+		getsockopt(sockfd_client, SOL_SOCKET, SO_ERROR, (char*)&err, &errlen);
+		if(err != WSAEWOULDBLOCK) {
+#endif
+			printf("Error reading server data over socket, closing\n");
+			sockfd_client = -1;
+			sock_server_buf_pending = 0;
+			return;
+#ifdef _WIN32
+		}
+#endif
+	}
+
+	/* if we reach this point, we got some data */
+	if(sock_server_buf_pending > (int)sizeof(unsigned short)) {
+		/* note packet_bytes does not include sizeof packet_bytes */
+		packet_bytes = ((unsigned short *)sock_server_buf)[0];
+		packet_bytes = ntohs(packet_bytes); /* fix network byte order */
+
+		if(packet_bytes == 0) {
+			/* invalid */
+			socketclose(sockfd_client);
+			sockfd_client = -1;
+			return;
+		}
+
+		if(sock_server_buf_pending >= (int)sizeof(packet_bytes) + packet_bytes) {
+			decode_server_packet(&(sock_server_buf[sizeof(packet_bytes)]), packet_bytes);
+			memmove(sock_server_buf, 
+				&(sock_server_buf[sizeof(packet_bytes)+packet_bytes]), 
+				SOCK_CLIENT_BUF_SIZE - sizeof(packet_bytes) - packet_bytes);
+		}
+	}
+}
+
 static void update_network() {
 	/* called by update_logic() to receive network updates */
 
@@ -549,15 +627,16 @@ static void update_network() {
 			}
 
 			for(i=0; i<3; i++) {
+				if(sockfd_clients[i] > -1) {
+					if(FD_ISSET(sockfd_clients[i], &readFDs)) {
+						read_client_data(i);
+					}
 
-				if(FD_ISSET(sockfd_clients[i], &readFDs)) {
-					read_client_data(i);
-				}
-
-				else if(FD_ISSET(sockfd_clients[i], &exceptFDs)) {
-					printf("Exception on client %d, closing socket\n", i);
-					socketclose(sockfd_clients[i]);
-					/* TODO end game */
+					else if(FD_ISSET(sockfd_clients[i], &exceptFDs)) {
+						printf("Exception on client %d, closing socket\n", i);
+						socketclose(sockfd_clients[i]);
+						/* TODO end game */
+					}
 				}
 
 			}
@@ -565,6 +644,7 @@ static void update_network() {
 			if(FD_ISSET(sockfd_client, &readFDs)) {
 				/* read some data from server */
 				printf("read some data from server\n");
+				read_server_data();
 			}
 
 			else if(FD_ISSET(sockfd_client, &exceptFDs)) {
@@ -1122,6 +1202,8 @@ static void gluiQuick(int code) {
 		show_about_dialog();
 	} else if(code == GLUI_HOSTGAME) {
 		show_hostgame_dialog();
+	} else if(code == GLUI_JOINGAME) {
+		show_joingame_dialog();
 	} else if(code == GLUI_HIGHSCORES) {
 		show_highscores();
 	}

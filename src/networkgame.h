@@ -22,7 +22,10 @@ extern int sock_client_buf_pending[3];
 #define SOCK_CLIENT_BUF_SIZE 1024
 
 extern int sockfd_client;
+extern char *sock_server_buf;
+extern int sock_server_buf_pending;
 
 void show_hostgame_dialog(void);
+void show_joingame_dialog(void);
 
 #endif
