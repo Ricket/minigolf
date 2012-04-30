@@ -398,11 +398,45 @@ static void next_hole() {
 	}
 }
 
+static void accept_new_connection() {
+	int clientid, i;
+	int newsocket;
+	int nAddrSize = sizeof(serv_addr);
+#ifdef _WIN32
+	u_long noBlock = 1;
+#endif
+
+	newsocket = accept(sockfd_server, (struct sockaddr *)&serv_addr, (socklen_t*)&nAddrSize);
+	if(newsocket > -1) {
+		clientid = -1;
+		for(i=0; i<3; i++) {
+			if(sockfd_clients[i] < 0) {
+				clientid = i;
+				break;
+			}
+		}
+		if(clientid == -1) {
+			/* no more connections accepted */
+			socketclose(newsocket);
+			return;
+		} else {
+			sockfd_clients[clientid] = newsocket;
+			/* initialize players[clientid+1] */
+		}
+
+#ifdef _WIN32
+		/* set non-blocking */
+		ioctlsocket(newsocket, FIONBIO, &noBlock);
+#endif
+	}
+}
+
 static void update_network() {
 	/* called by update_logic() to receive network updates */
 
 	fd_set readFDs, exceptFDs;
 	int i, nfds = -1;
+	struct timeval tv_returnimmediately;
 
 	FD_ZERO(&readFDs);FD_ZERO(&exceptFDs);
 
@@ -428,8 +462,16 @@ static void update_network() {
 		nfds = sockfd_client + 1;
 	}
 
-	if(select(nfds, &readFDs, NULL, &exceptFDs, 0) > 0) {
+	memset(&tv_returnimmediately, '\0', sizeof(struct timeval));
 
+	if(select(nfds, &readFDs, NULL, &exceptFDs, &tv_returnimmediately) > 0) {
+		if(network_mode == NM_SERVER) {
+			if(FD_ISSET(sockfd_server, &readFDs)) {
+				accept_new_connection();
+			}
+		} else if(network_mode == NM_CLIENT) {
+
+		}
 	}
 }
 

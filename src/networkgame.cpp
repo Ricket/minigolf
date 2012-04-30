@@ -29,6 +29,7 @@
 
 int network_mode = NM_LOCAL;
 int sockfd_server = -1;
+struct sockaddr_in serv_addr;
 int sockfd_clients[3];
 int sockfd_client = -1;
 
@@ -110,7 +111,6 @@ static void text_hostgame(int code) {
 }
 
 static void button_hostgame(int code) {
-	struct sockaddr_in serv_addr;
 	int portnum;
 #ifdef _WIN32
 	WSADATA wsaData = {0};
