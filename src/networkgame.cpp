@@ -22,6 +22,7 @@
 #else
 #  include <sys/socket.h>
 #  include <netinet/in.h> /* struct sockaddr_in */
+#  include <netinet/tcp.h> /* TCP_NODELAY */
 #  include <netdb.h> /* gethostbyname() */
 #  define socketwrite(socket, buf, len) ( write((socket), (buf), (len)) )
 #  define socketread(socket, buf, len) ( read((socket), (buf), (len)) )
@@ -29,6 +30,7 @@
 #endif
 
 int network_mode = NM_LOCAL;
+int my_player_num = 0;
 int sockfd_server = -1;
 struct sockaddr_in serv_addr;
 int sockfd_clients[3];
@@ -38,6 +40,12 @@ int sock_client_buf_pending[3];
 int sockfd_client = -1;
 char *sock_server_buf = NULL;
 int sock_server_buf_pending = 0;
+
+/* stuff from main */
+extern std::string newFilename;
+extern int newPlayerEnabled[4];
+extern std::string newPlayerNames[4];
+void start_game_from_new_values();
 
 /* host */
 static GLUI *hostgameDialog = NULL;
@@ -57,11 +65,13 @@ static void button_hostgame(int);
 
 /* join */
 static GLUI *joingameDialog = NULL;
-static GLUI_EditText *gluiServerHostName = NULL, *gluiServerPort = NULL;
+static GLUI_EditText *gluiServerHostName = NULL, *gluiServerPort = NULL, *gluiRemoteName = NULL;
 static std::string serverHostName, serverPort;
+std::string remoteName;
 
 #define GH_SERVER_ADDR 120
 #define GH_SERVER_PORT 121
+#define GH_REMOTE_NAME 122
 
 static void text_joingame(int);
 static void button_joingame(int);
@@ -74,6 +84,8 @@ void show_hostgame_dialog() {
 	}
 
 	hostgameDialog = GLUI_Master.create_glui("Host Game");
+
+	new GLUI_EditText(hostgameDialog, "Input file:", newFilename);
 
 	port = std::string("");
 	gluiPort = new GLUI_EditText(hostgameDialog, "Port:", port, GH_PORT, &text_hostgame);
@@ -110,6 +122,8 @@ void show_hostgame_dialog() {
 	hostBtnStartGame->disable();
 	hostgameDialog->add_column_to_panel(panel, false);
 	hostBtnCancel = hostgameDialog->add_button_to_panel(panel, "Cancel/Stop", GH_CANCEL, &button_hostgame);
+
+	my_player_num = 0;
 }
 
 static void text_hostgame(int code) {
@@ -198,12 +212,25 @@ static void button_hostgame(int code) {
 			sockfd_clients[i] = -1;
 			sock_client_buf[i] = NULL;
 			sock_client_buf_pending[i] = 0;
+
+			newPlayerEnabled[i+1] = 0;
 		}
+
+		newPlayerEnabled[0] = 1;
+		newPlayerNames[0] = std::string(hostName);
 
 		network_mode = NM_SERVER;
 
 	} else if(code == GH_STARTGAME) {
 		/* start game */
+
+		/* send start message */
+
+		socket_send_str(sockfd_client, MSG_START, newFilename);
+		
+		/* trigger actual game start */
+
+		start_game_from_new_values();
 	}
 }
 
@@ -219,6 +246,9 @@ void show_joingame_dialog() {
 	
 	serverPort = std::string("");
 	gluiServerPort = new GLUI_EditText(joingameDialog, "Port:", serverPort, GH_SERVER_PORT, &text_joingame);
+
+	remoteName = std::string("");
+	gluiRemoteName = new GLUI_EditText(joingameDialog, "Your name:", remoteName, GH_REMOTE_NAME, &text_joingame);
 	
 	joingameDialog->add_button("Join", 0, &button_joingame);
 }
@@ -228,8 +258,6 @@ static void text_joingame(int code) {
 
 static void button_joingame(int code) {
 	struct addrinfo *serverAddrInfo;
-	int i;
-	char buffer[100];
 #ifdef _WIN32
 	WSADATA wsaData = {0};
 	int rsaResult = 0;
@@ -237,6 +265,7 @@ static void button_joingame(int code) {
 
 	gluiServerHostName->disable();
 	gluiServerPort->disable();
+	gluiRemoteName->disable();
 
 #ifdef _WIN32
 		if((rsaResult = WSAStartup(MAKEWORD(2, 2), &wsaData)) != 0) {
@@ -275,13 +304,10 @@ static void button_joingame(int code) {
 		return;
 	}
 
-	i = 0;
-	((unsigned short *)buffer)[0] = htons((unsigned short)sizeof(char));
-	i += sizeof(unsigned short);
-	buffer[i] = 50;
-	i += sizeof(char);
+	/* send name message */
+	socket_send_str(sockfd_client, MSG_NAME, remoteName);
 
-	socketwrite(sockfd_client, buffer, i);
+	/* allocate buffer, etc. */
 
 	if(sock_server_buf == NULL) {
 		sock_server_buf = (char*)malloc(SOCK_CLIENT_BUF_SIZE);
@@ -290,6 +316,88 @@ static void button_joingame(int code) {
 
 	network_mode = NM_CLIENT;
 
-	joingameDialog->close();
-	joingameDialog = NULL;
+	joingameDialog->add_statictext("Waiting for host...");
+}
+
+void close_joingame_dialog() {
+	if(joingameDialog != NULL) {
+		joingameDialog->close();
+		joingameDialog = NULL;
+	}
+}
+
+void socket_send_void(int sock, char type) {
+	int i;
+	char buffer[512];
+
+	i = 0;
+	((unsigned short *)buffer)[0] = htons((unsigned short)sizeof(char));
+	i += sizeof(unsigned short);
+	buffer[i] = type;
+	i += sizeof(char);
+
+	socketwrite(sock, buffer, i);
+}
+
+void socket_send_str(int sock, char type, std::string str) {
+	int i;
+	char buffer[512];
+
+	i = sizeof(unsigned short); /* account for length, added at end */
+	buffer[i] = type;
+	i += sizeof(char);
+	*((unsigned int*)(&(buffer[i]))) = htonl((unsigned int)str.length());
+	i += sizeof(unsigned int);
+	if(str.length() > 0) {
+		memcpy(&buffer[i], str.c_str(), str.length());
+		i += str.length();
+	}
+
+	((unsigned short *)buffer)[0] = htons(i - sizeof(unsigned short));
+
+	socketwrite(sock, buffer, i);
+}
+
+void socket_send_char(int sock, char type, char c) {
+	int i;
+	char buffer[512];
+
+	i = sizeof(unsigned short); /* account for length, added at end */
+	buffer[i] = type;
+	i += sizeof(char);
+	buffer[i] = c;
+	i += sizeof(char);
+
+	((unsigned short *)buffer)[0] = htons(i - sizeof(unsigned short));
+
+	socketwrite(sock, buffer, i);
+}
+
+void socket_send_char_str(int sock, char type, char c, std::string str) {
+	int i;
+	char buffer[512];
+
+	i = sizeof(unsigned short); /* account for length, added at end */
+	buffer[i] = type;
+	i += sizeof(char);
+	buffer[i] = c;
+	i += sizeof(char);
+	*((unsigned int*)(&(buffer[i]))) = htonl((unsigned int)str.length());
+	i += sizeof(unsigned int);
+	if(str.length() > 0) {
+		memcpy(&buffer[i], str.c_str(), str.length());
+		i += str.length();
+	}
+
+	((unsigned short *)buffer)[0] = htons(i - sizeof(unsigned short));
+
+	socketwrite(sock, buffer, i);
+}
+
+void broadcast_except_char_str(int exceptId, char type, char c, std::string str) {
+	int i;
+	for(i=0; i<3; i++) {
+		if(i == exceptId || sockfd_clients[i] < 0) continue;
+		socket_send_char_str(sockfd_clients[i], type, c, str);
+	}
 }

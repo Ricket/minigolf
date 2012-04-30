@@ -37,6 +37,7 @@
 #else
 #  include <sys/socket.h>
 #  include <netinet/in.h> /* struct sockaddr_in */
+#  include <netinet/tcp.h> /* TCP_NODELAY */
 #  include <netdb.h> /* gethostbyname() */
 #  define socketwrite(socket, buf, len) ( write((socket), (buf), (len)) )
 #  define socketread(socket, buf, len) ( read((socket), (buf), (len)) )
@@ -105,11 +106,11 @@ enum gamestate {
 
 static int windowId;
 static GLUI *glui = NULL, *gluiNewGame = NULL;
-static std::string newFilename;
-static int newPlayerEnabled[4];
-static std::string newPlayerNames[4];
+std::string newFilename;
+int newPlayerEnabled[4];
+std::string newPlayerNames[4];
 
-static char *filename = NULL;
+char *filename = NULL;
 static struct player *players[4];
 static int currentPlayer;
 static GLUI_StaticText *gluiCurrentPlayer = NULL;
@@ -407,6 +408,8 @@ static void accept_new_connection() {
 	int nAddrSize = sizeof(serv_addr);
 #ifdef _WIN32
 	u_long noBlock = 1;
+#else
+	int flag = 1;
 #endif
 
 	newsocket = accept(sockfd_server, (struct sockaddr *)&serv_addr, 
@@ -428,34 +431,48 @@ static void accept_new_connection() {
 			/* no more connections accepted */
 			socketclose(newsocket);
 			return;
-		} else {
-			sockfd_clients[clientid] = newsocket;
-			sock_client_buf_pending[clientid] = 0;
-			sock_client_buf[clientid] = (char*)malloc(SOCK_CLIENT_BUF_SIZE);
-			/* initialize players[clientid+1] */
 		}
+
+		/* disable nagle algorithm */
+		setsockopt(newsocket, IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(int));
 
 #ifdef _WIN32
 		/* set non-blocking */
 		ioctlsocket(newsocket, FIONBIO, &noBlock);
 #endif
+
+		sockfd_clients[clientid] = newsocket;
+		sock_client_buf_pending[clientid] = 0;
+		sock_client_buf[clientid] = (char*)malloc(SOCK_CLIENT_BUF_SIZE);
+
+		/* send player num message */
+		socket_send_char(sockfd_clients[clientid], MSG_YOUR_PLAYER_NUM, (char)clientid+1);
+
+		/* send host player name */
+		socket_send_char_str(sockfd_clients[clientid], MSG_NAME, 0, newPlayerNames[0]);
 	}
 }
 
 static void decode_client_packet(int id, char *packet, int len) {
-	char buffer[100];
-	int i;
+	/* (packet FROM client) */
+	char *buf;
+	int buflen;
 
 	printf("Got packet ID %d\n", (int)packet[0]);
 
-	/* send test packet 50 back */
-	i = 0;
-	((unsigned short *)buffer)[0] = htons((unsigned short)sizeof(char));
-	i += sizeof(unsigned short);
-	buffer[i] = 50;
-	i += sizeof(char);
+	if(packet[0] == MSG_NAME) {
+		buflen = ntohl(*((unsigned int *)(&packet[1])));
+		buf = (char*)malloc(buflen+1);
+		buf[buflen] = '\0';
+		memcpy(buf, &packet[1+sizeof(unsigned int)], buflen);
 
-	socketwrite(sockfd_clients[id], buffer, i);
+		newPlayerNames[id+1] = std::string(buf);
+
+		printf("Got player %d name %s\n", id+1, buf);
+
+		/* TODO broadcast it to the other clients */
+		broadcast_except_char_str(id, MSG_NAME, (char)id+1, newPlayerNames[id+1]);
+	}
 }
 
 static void read_client_data(int id) {
@@ -514,12 +531,46 @@ static void read_client_data(int id) {
 			memmove(sock_client_buf[id], 
 				&(sock_client_buf[id][sizeof(packet_bytes)+packet_bytes]), 
 				SOCK_CLIENT_BUF_SIZE - sizeof(packet_bytes) - packet_bytes);
+			sock_client_buf_pending[id] -= ((int)sizeof(packet_bytes) + packet_bytes);
+		} else {
+			printf("Got some data but %d < %d\n", sock_client_buf_pending[id], (int)sizeof(packet_bytes) + packet_bytes);
 		}
 	}
 }
 
 static void decode_server_packet(char *packet, int len) {
+	/* (packet FROM host) */
+	int otherId;
+	char *buf;
+	int buflen;
+
 	printf("Got packet ID %d\n", (int)packet[0]);
+	if(packet[0] == MSG_YOUR_PLAYER_NUM) {
+		my_player_num = packet[1];
+		newPlayerEnabled[0] = 1;
+		newPlayerEnabled[my_player_num] = 1;
+		newPlayerNames[my_player_num] = std::string(remoteName);
+
+		printf("I am player number %d\n", my_player_num);
+
+	} else if(packet[0] == MSG_NAME) {
+
+		otherId = packet[1];
+		buflen = ntohl(*((unsigned int *)(&packet[2])));
+		buf = (char*)malloc(buflen+1);
+		buf[buflen] = '\0';
+		memcpy(buf, &packet[2+sizeof(unsigned int)], buflen);
+
+		newPlayerEnabled[otherId] = 1;
+		newPlayerNames[otherId] = std::string(buf);
+
+		printf("Got player %d name %s\n", otherId, buf);
+
+	} else if(packet[0] == MSG_START) {
+
+		printf("The game is starting\n");
+
+	}
 }
 
 static void read_server_data() {
@@ -578,6 +629,9 @@ static void read_server_data() {
 			memmove(sock_server_buf, 
 				&(sock_server_buf[sizeof(packet_bytes)+packet_bytes]), 
 				SOCK_CLIENT_BUF_SIZE - sizeof(packet_bytes) - packet_bytes);
+			sock_server_buf_pending -= ((int)sizeof(packet_bytes) + packet_bytes);
+		} else {
+			printf("Got some data but %d < %d\n", sock_server_buf_pending, (int)sizeof(packet_bytes) + packet_bytes);
 		}
 	}
 }
@@ -825,7 +879,23 @@ static void render() {
 	
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if(course == NULL) {
+    if(network_mode == NM_CLIENT && course == NULL) {
+    	// Waiting for server
+		push2D();
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		glRasterPos2f(-1.0f, 0.9f);
+		myGlutBitmapString(GLUT_BITMAP_HELVETICA_18, "Waiting for host to start game");
+		pop2D();
+    }
+    else if(network_mode == NM_SERVER && course == NULL) {
+    	// Waiting to start game
+		push2D();
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		glRasterPos2f(-1.0f, 0.9f);
+		myGlutBitmapString(GLUT_BITMAP_HELVETICA_18, "Host, start game when ready!");
+		pop2D();
+    }
+	else if(network_mode == NM_LOCAL && course == NULL) {
 		// Before new game
 		push2D();
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1134,6 +1204,26 @@ static void keypress_special(int key, int x, int y) {
 	glutPostRedisplay();
 }
 
+void start_game_from_new_values() {
+	int i;
+
+	if(newFilename.length() > 0) {
+		strcpy(filename, newFilename.c_str());
+	}
+
+	reload_course();
+
+	if(course != NULL) {
+		clear_scorecard(scorecard, 4, course->num_holes);
+		for(i=0; i<4; i++) {
+			strcpy(players[i]->name, newPlayerNames[i].c_str());
+			players[i]->enabled = newPlayerEnabled[i];
+			set_playername(scorecard, i, players[i]->name);
+			set_playerenabled(scorecard, i, players[i]->enabled);
+		}
+	}
+}
+
 static void gluiQuick(int code) {
 	int i;
 
@@ -1177,21 +1267,7 @@ static void gluiQuick(int code) {
 
 	} else if(code == GLUI_NEW_GAME_OK) {
 		/* user clicked OK; copy new values into vals */
-		if(newFilename.length() > 0) {
-			strcpy(filename, newFilename.c_str());
-		}
-
-		reload_course();
-
-		if(course != NULL) {
-			clear_scorecard(scorecard, 4, course->num_holes);
-			for(i=0; i<4; i++) {
-				strcpy(players[i]->name, newPlayerNames[i].c_str());
-				players[i]->enabled = newPlayerEnabled[i];
-				set_playername(scorecard, i, players[i]->name);
-				set_playerenabled(scorecard, i, players[i]->enabled);
-			}
-		}
+		start_game_from_new_values();
 	} else if(code == SCORECARD_OK) {
 		gluiScorecard->close();
 		gluiScorecard = NULL;
