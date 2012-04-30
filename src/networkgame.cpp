@@ -15,13 +15,16 @@
 #ifdef _WIN32
 #  pragma comment(lib, "Ws2_32.lib")
 #  include <winsock2.h>
-#  define write(socket, buf, len) ( send((socket), (buf), (len), 0) )
-#  define read(socket, buf, len) ( recv((socket), (buf), (len), 0) )
-#  define close(socket) ( closesocket(socket) )
+#  define socketwrite(socket, buf, len) ( send((socket), (buf), (len), 0) )
+#  define socketread(socket, buf, len) ( recv((socket), (buf), (len), 0) )
+#  define socketclose(socket) ( closesocket(socket) )
 #else
 #  include <sys/socket.h>
 #  include <netinet/in.h> /* struct sockaddr_in */
 #  include <netdb.h> /* gethostbyname() */
+#  define socketwrite(socket, buf, len) ( write((socket), (buf), (len)) )
+#  define socketread(socket, buf, len) ( read((socket), (buf), (len)) )
+#  define socketclose(socket) ( close(socket) )
 #endif
 
 int network_mode = NM_LOCAL;
@@ -107,19 +110,33 @@ static void text_hostgame(int code) {
 static void button_hostgame(int code) {
 	struct sockaddr_in serv_addr;
 	int portnum;
+#ifdef _WIN32
+	WSADATA wsaData = {0};
+	int rsaResult = 0;
+#endif
 
 	if(code == GH_CANCEL) {
 		hostgameDialog->close();
 		hostgameDialog = NULL;
 
 		if(sockfd >= 0) {
-			close(sockfd);
+			socketclose(sockfd);
 			sockfd = -1;
+#ifdef _WIN32
+			WSACleanup();
+#endif
 		}
 	} else if(code == GH_STARTLISTENING) {
 		/* start listening */
 		gluiPort->disable(); /* disallow changing port */
 		gluiHostName->disable(); /* disallow changing host name */
+
+#ifdef _WIN32
+		if((rsaResult = WSAStartup(MAKEWORD(2, 2), &wsaData)) != 0) {
+			printf("WSAStartup failed: %d\n", rsaResult);
+			return;
+		}
+#endif
 
 		sockfd = socket(AF_INET, SOCK_STREAM, 0);
 		if(sockfd < 0) {
@@ -135,8 +152,11 @@ static void button_hostgame(int code) {
 		if(bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr_in)) < 0) {
 			printf("Error binding socket\n");
 			/* TODO handle error */
-			close(sockfd);
+			socketclose(sockfd);
 			sockfd = -1;
+#ifdef _WIN32
+			WSACleanup();
+#endif
 			return;
 		}
 		listen(sockfd, 5);

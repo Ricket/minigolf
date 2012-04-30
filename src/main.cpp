@@ -30,13 +30,16 @@
 #ifdef _WIN32
 #  pragma comment(lib, "Ws2_32.lib")
 #  include <winsock2.h>
-#  define write(socket, buf, len) ( send((socket), (buf), (len), 0) )
-#  define read(socket, buf, len) ( recv((socket), (buf), (len), 0) )
-#  define close(socket) ( closesocket(socket) )
+#  define socketwrite(socket, buf, len) ( send((socket), (buf), (len), 0) )
+#  define socketread(socket, buf, len) ( recv((socket), (buf), (len), 0) )
+#  define socketclose(socket) ( closesocket(socket) )
 #else
 #  include <sys/socket.h>
 #  include <netinet/in.h> /* struct sockaddr_in */
 #  include <netdb.h> /* gethostbyname() */
+#  define socketwrite(socket, buf, len) ( write((socket), (buf), (len)) )
+#  define socketread(socket, buf, len) ( read((socket), (buf), (len)) )
+#  define socketclose(socket) ( close(socket) )
 #endif
 
 #ifdef _WIN32
