@@ -484,7 +484,7 @@ static void read_client_data(int id) {
 
 		if(packet_bytes == 0) {
 			/* invalid */
-			close(sockfd_clients[id]);
+			socketclose(sockfd_clients[id]);
 			sockfd_clients[id] = -1;
 		}
 	}
