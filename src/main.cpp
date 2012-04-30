@@ -439,6 +439,10 @@ static void accept_new_connection() {
 	}
 }
 
+static void decode_client_packet(int id, char *packet, int len) {
+	printf("Got packet ID %d\n", (int)packet[0]);
+}
+
 static void read_client_data(int id) {
 	/* socketread */
 	int nbytes;
@@ -479,13 +483,22 @@ static void read_client_data(int id) {
 
 	/* if we reach this point, we got some data */
 	if(sock_client_buf_pending[id] > (int)sizeof(unsigned short)) {
-		packet_bytes = ((unsigned short *)sock_client_buf)[0];
+		/* note packet_bytes does not include sizeof packet_bytes */
+		packet_bytes = ((unsigned short *)sock_client_buf[id])[0];
 		packet_bytes = ntohs(packet_bytes); /* fix network byte order */
 
 		if(packet_bytes == 0) {
 			/* invalid */
 			socketclose(sockfd_clients[id]);
 			sockfd_clients[id] = -1;
+			return;
+		}
+
+		if(sock_client_buf_pending[id] >= (int)sizeof(packet_bytes) + packet_bytes) {
+			decode_client_packet(id, &(sock_client_buf[id][sizeof(packet_bytes)]), packet_bytes);
+			memmove(sock_client_buf[id], 
+				&(sock_client_buf[id][sizeof(packet_bytes)+packet_bytes]), 
+				SOCK_CLIENT_BUF_SIZE - sizeof(packet_bytes) - packet_bytes);
 		}
 	}
 }
