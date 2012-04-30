@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGUID>{6FCE6AD2-8C96-4D8D-B3FB-19200D99A664}</ProjectGUID>
+    <ProjectGUID>{E3574746-223F-4DD4-9013-12F07888841B}</ProjectGUID>
     <Keyword>Win32Proj</Keyword>
     <Platform>Win32</Platform>
     <ProjectName>Minigolf</ProjectName>
@@ -79,7 +79,6 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">true</GenerateManifest>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Users\Ricky\Dev\minigolf\lib\glui\windows;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Users\Ricky\Dev\minigolf\lib\glui\windows;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -113,7 +112,7 @@
     </Midl>
     <Link>
       <AdditionalOptions> /machine:X86 /debug %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;..\..\lib\glui\windows\glui32d.lib;C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\lib\glut32.lib;glu32.lib;opengl32.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;..\..\lib\glui\windows\glui32.lib;C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\lib\glut32.lib;glu32.lib;opengl32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:/Users/Ricky/Dev/minigolf/lib/glui/windows;C:/Users/Ricky/Dev/minigolf/lib/glui/windows/$(Configuration);;C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib;C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>C:/Users/Ricky/Dev/minigolf/vs2010/Debug/Minigolf.lib</ImportLibrary>
@@ -326,12 +325,13 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\Users\Ricky\Dev\minigolf\src\physics.cpp" />
     <ClCompile Include="C:\Users\Ricky\Dev\minigolf\src\scorecard.cpp" />
     <ClCompile Include="C:\Users\Ricky\Dev\minigolf\src\about.cpp" />
+    <ClCompile Include="C:\Users\Ricky\Dev\minigolf\src\networkgame.cpp" />
     <ClCompile Include="C:\Users\Ricky\Dev\minigolf\src\highscores.cpp" />
     <ClCompile Include="C:\Users\Ricky\Dev\minigolf\src\object.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:/Users/Ricky/Dev/minigolf/vs2010/ZERO_CHECK.vcxproj">
-      <Project>1F45A3CD-AA26-417F-A68F-73C63A163A73</Project>
+      <Project>D1293050-9247-4157-9D64-A08D0FCC8C88</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

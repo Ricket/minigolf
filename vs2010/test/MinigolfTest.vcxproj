@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGUID>{DC17912E-C16F-494C-8940-E309F8EBD741}</ProjectGUID>
+    <ProjectGUID>{53DD2391-E79C-4FE6-A316-3851D6099792}</ProjectGUID>
     <Keyword>Win32Proj</Keyword>
     <Platform>Win32</Platform>
     <ProjectName>MinigolfTest</ProjectName>
@@ -320,7 +320,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:/Users/Ricky/Dev/minigolf/vs2010/ZERO_CHECK.vcxproj">
-      <Project>1F45A3CD-AA26-417F-A68F-73C63A163A73</Project>
+      <Project>D1293050-9247-4157-9D64-A08D0FCC8C88</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
