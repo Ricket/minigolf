@@ -461,7 +461,7 @@ static void read_client_data(int id) {
 	if(nbytes < 0) {
 #ifdef _WIN32
 		/* on windows, WSAEWOULDBLOCK error should be ignored */
-		errlen = sizeof(err)
+		errlen = sizeof(err);
 		getsockopt(sockfd_clients[id], SOL_SOCKET, SO_ERROR, (char*)&err, &errlen);
 		if(err != WSAEWOULDBLOCK) {
 #endif
