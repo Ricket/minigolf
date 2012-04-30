@@ -406,7 +406,13 @@ static void accept_new_connection() {
 	u_long noBlock = 1;
 #endif
 
-	newsocket = accept(sockfd_server, (struct sockaddr *)&serv_addr, (socklen_t*)&nAddrSize);
+	newsocket = accept(sockfd_server, (struct sockaddr *)&serv_addr, 
+#ifdef _WIN32
+		&nAddrSize);
+#else
+		(socklen_t*)&nAddrSize);
+#endif
+
 	if(newsocket > -1) {
 		clientid = -1;
 		for(i=0; i<3; i++) {
